@@ -1,0 +1,28 @@
+From: root@localhost:
+Subject: [example.com #1] Test by mail
+
+
+Queue: NotGeneral
+Status: stalled
+Owner: root
+FinalPriority: 55
+Priority: 44
+Subject: Test by mail worked
+Due: 2006-01-01
+AddCc: c1@example.com
+AddCc: cc2@example.com
+AddAdminCc: admincc1@example.com
+AddAdminCc: admincc2@example.com
+AddRequestor: requestor1@example.com
+AddRequestor: requestor2@example.com
+Starts: 2006-02-02
+Started: 2006-03-03
+TimeWorked: 10
+TimeLeft: 10
+TimeEstimated: 20
+
+
+This is some content
+
+
+
