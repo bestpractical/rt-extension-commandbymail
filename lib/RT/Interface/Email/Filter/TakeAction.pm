@@ -3,6 +3,12 @@ package RT::Interface::Email::Filter::TakeAction;
 use warnings;
 use strict;
 
+our @REGULAR_ATTRIBUTES = qw(Queue Status Priority FinalPriority
+    TimeWorked TimeLeft TimeEstimated Subject );
+our @DATE_ATTRIBUTES = qw(Due Starts Started Resolved Told);
+            our @LINK_ATTRIBUTES = qw(MemberOf Parents Members Children
+            HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
+
 =head2 my commands
 
 Queue: <name> Set new queue for the ticket
@@ -75,7 +81,6 @@ sub GetCurrentUser {
     warn "walking lines";
     my @items;
     foreach my $line (@content) {
-        warn "My line is $line";
         last if ( $line !~ /^(?:(\S+)\s*?:\s*?(.*)\s*?|)$/ );
         push( @items, $1 => $2 );
     }
@@ -90,23 +95,27 @@ sub GetCurrentUser {
         }
     }
 
-    use YAML;
-    warn YAML::Dump( \@items );
     my %results;
 
     my $ticket_as_user = RT::Ticket->new( $args{'CurrentUser'} );
+    my $queue          = RT::Queue->new( $args{'CurrentUser'} );
+    if ( $cmds{'queue'} ) {
+        $queue->Load( $cmds{'queue'} );
+    }
 
+    if ( !$queue->id ) {
+        $queue->Load( $args{'Queue'}->id );
+    }
+
+    my $custom_fields = $queue->TicketCustomFields;
+
+    # If we're updating.
     if ( $args{'Ticket'}->id ) {
         $ticket_as_user->Load( $args{'Ticket'}->id );
 
-        foreach my $attribute (
-            qw(Queue Status Priority FinalPriority
-            TimeWorked TimeLeft TimeEstimated Subject )
-            ) {
-            next
-                unless ( defined $cmds{ lc $attribute }
-                and
-                ( $ticket_as_user->$attribute() ne $cmds{ lc $attribute } ) );
+        foreach my $attribute (@REGULAR_ATTRIBUTES) {
+            next unless ( defined $cmds{ lc $attribute }
+                and ( $ticket_as_user->$attribute() ne $cmds{ lc $attribute } ) );
 
             _SetAttribute(
                 $ticket_as_user,        $attribute,
@@ -114,7 +123,7 @@ sub GetCurrentUser {
             );
         }
 
-        foreach my $attribute (qw(Due Starts Started Resolved Told)) {
+        foreach my $attribute (@DATE_ATTRIBUTES) {
             next unless ( $cmds{ lc $attribute } );
             my $date = RT::Date->new( $args{'CurrentUser'} );
             $date->Set(
@@ -144,24 +153,10 @@ sub GetCurrentUser {
                 }
             }
         }
-        for (
-            qw(MemberOf Parents Members Children
-            HasMember RefersTo ReferredToBy
-            DependsOn DependedOnBy)
-            ) {
+        for (@LINK_ATTRIBUTES) {
 
+            die "Haven't handled links yet"
         }
-
-        my $queue = RT::Queue->new( $args{'CurrentUser'} );
-        if ( $cmds{'queue'} ) {
-            $queue->Load( $cmds{'queue'} );
-        }
-
-        if ( !$queue->id ) {
-            $queue->Load( $args{'Queue'}->id );
-        }
-
-        my $custom_fields = $queue->TicketCustomFields;
 
         while ( my $cf = $custom_fields->Next ) {
             next unless ( defined $cmds{ lc $cf->Name } );
@@ -175,23 +170,64 @@ sub GetCurrentUser {
                 message => $msg
             };
         }
+        return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
 
     } else {
 
         my %create_args = ();
+        foreach my $attr (@REGULAR_ATTRIBUTES) {
+            $create_args{$attr} = $cmds{ lc $attr }
+                if ( exists $cmds{ lc $attr } );
+        }
+        foreach my $attr (@DATE_ATTRIBUTES) {
+            next unless ( $cmds{ lc $attr } );
+            my $date = RT::Date->new( $args{'CurrentUser'} );
+            $date->Set(
+                Format => 'unknown',
+                value  => $cmds{ lc $attr }
+            );
+            $create_args{$attr} = $date->ISO;
+        }
 
         # Canonicalize links
+        foreach my $attr (@LINK_ATTRIBUTES) {
+            $create_args{$attr} = $cmds{lc $attr};
+
+        }
         # Canonicalize custom fields
+        while ( my $cf = $custom_fields->Next ) {
+            next unless ( exists $cmds{ lc $cf->Name } );
+            $create_args{ 'CustomField-' . $cf->id } = $cmds{ lc $cf->Name };
+
+        }
+
         # Canonicalize watchers
 
-        $ticket_as_user->Create(%create_args);
+        foreach my $base_type (qw(Requestor Cc AdminCc)) {
+            foreach my $type (
+                $base_type,
+                "Add" . $base_type,
+                $base_type . "s",
+                "Add" . $base_type . "s"
+                ) {
+                next unless ( exists $cmds{ lc $type } );
+                push @{ $create_args{ lc $base_type } }, $cmds{ lc $type };
+
+            }
+        }
 
         # If we don't already have a ticket, we're going to create a new
         # ticket
 
+        my ( $val, $ticket_msg, $txn_msg )
+            = $ticket_as_user->Create(%create_args);
+        my $id = $ticket_as_user->id();
+
+       # now that we've created a ticket, we abort so we don't create another.
+        $args{'Ticket'}->Load($id);
+        return ( $args{'CurrentUser'}, -1 );
+
     }
-    warn YAML::Dump(\%results);
-    return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
 }
 
 sub _SetAttribute {
@@ -223,9 +259,25 @@ sub _SetWatcherAttribute {
     );
 
     $results->{$attribute} = {
-        value   => $value,
+        value   => $email,
         result  => $val,
         message => $msg
     };
+
+}
+
+
+
+sub _ReportResults {
+    my $report = shift;
+    my $recipient = shift;
+
+        
+    my $report_msg = '';
+
+    foreach my $key (keys %$report) {
+        $report_msg .= $key.":".$report->{$key}->{$value};
+    }
+
 
 }
