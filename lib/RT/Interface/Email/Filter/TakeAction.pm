@@ -86,12 +86,12 @@ sub GetCurrentUser {
     }
     my %cmds;
     while ( my $key = lc shift @items ) {
-        my $value = shift @items;
+        my $val = shift @items;
+        $val =~ s/^\s+|\s+$//g; # strip leading and trailing spaces
         if ( $key =~ /^(?:Add|Del)/i ) {
             push @{ $cmds{$key} }, $val;
         } else {
             $cmds{$key} = $val;
-
         }
     }
 
@@ -174,17 +174,19 @@ sub GetCurrentUser {
 
     } else {
 
+        warn "Create new ticket";
+
         my %create_args = ();
         foreach my $attr (@REGULAR_ATTRIBUTES) {
-            $create_args{$attr} = $cmds{ lc $attr }
-                if ( exists $cmds{ lc $attr } );
+            next unless exists $cmds{ lc $attr };
+            $create_args{$attr} = $cmds{ lc $attr };
         }
         foreach my $attr (@DATE_ATTRIBUTES) {
-            next unless ( $cmds{ lc $attr } );
+            next unless exists $cmds{ lc $attr };
             my $date = RT::Date->new( $args{'CurrentUser'} );
             $date->Set(
                 Format => 'unknown',
-                value  => $cmds{ lc $attr }
+                Value  => $cmds{ lc $attr }
             );
             $create_args{$attr} = $date->ISO;
         }
@@ -216,12 +218,21 @@ sub GetCurrentUser {
             }
         }
 
+        # get queue unless mail contain it
+
+        $create_args{'Queue'} = $args{'Queue'} unless exists $create_args{'Queue'};
+
         # If we don't already have a ticket, we're going to create a new
         # ticket
+        
 
-        my ( $val, $ticket_msg, $txn_msg )
-            = $ticket_as_user->Create(%create_args);
-        my $id = $ticket_as_user->id();
+        warn YAML::Dump( \%create_args );
+
+        my ( $id, $txn_id, $msg ) = $ticket_as_user->Create( %create_args );
+        unless ( $id ) {
+            $RT::Logger->error("Couldn't create ticket, fallback to standard mailgate: $msg");
+            return ($args{'CurrentUser'}, $args{'AuthLevel'});
+        }
 
        # now that we've created a ticket, we abort so we don't create another.
         $args{'Ticket'}->Load($id);
@@ -272,12 +283,12 @@ sub _ReportResults {
     my $report = shift;
     my $recipient = shift;
 
-        
     my $report_msg = '';
 
     foreach my $key (keys %$report) {
-        $report_msg .= $key.":".$report->{$key}->{$value};
+#        $report_msg .= $key.":".$report->{$key}->{$value};
     }
 
 
 }
+1;
