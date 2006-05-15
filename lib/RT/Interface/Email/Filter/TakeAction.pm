@@ -12,30 +12,39 @@ our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
 =head2 my commands
 
 Queue: <name> Set new queue for the ticket
+Subject: <string> Set new subject to the given string
 Status: <status> Set new status, one of new, open, stalled,
 resolved, rejected or deleted
 Owner: <username> Set new owner using the given username
-FinalPriority: <#> Set new final priority to the given value (1-99)
 Priority: <#> Set new priority to the given value (1-99)
-Subject: <string> Set new subject to the given string
-Due: <new timestamp> Set new due date/timestamp, or 0 to disable.
-+AddCc: <address> Add new Cc watcher using the email address
-+DelCc: <address> Remove email address as Cc watcher
-+AddAdminCc: <address> Add new AdminCc watcher using the email address
-+DelAdminCc: <address> Remove email address as AdminCc watcher
+FinalPriority: <#> Set new final priority to the given value (1-99)
+
++Requestor: <address> Set requestor(s) using the email address
 +AddRequestor: <address> Add new requestor using the email address
 +DelRequestor: <address> Remove email address as requestor
++Cc: <address> Set Cc watcher(s) using the email address
++AddCc: <address> Add new Cc watcher using the email address
++DelCc: <address> Remove email address as Cc watcher
++AdminCc: <address> Set AdminCc watcher(s) using the email address
++AddAdminCc: <address> Add new AdminCc watcher using the email address
++DelAdminCc: <address> Remove email address as AdminCc watcher
+
+Due: <new timestamp> Set new due date/timestamp, or 0 to disable.
 Starts: <new timestamp>
 Started: <new timestamp>
 TimeWorked: <minutes> Replace the tickets 'timeworked' value.
 TimeEstimated: <minutes>
 TimeLeft: <minutes>
-DependsOn:
-DependedOnBy:
-RefersTo:
-ReferredToBy:
-HasMember:
-MemberOf:
+
++DependsOn:
++AddDependsOn:
++DelDependsOn
++DependedOnBy:
++RefersTo:
++ReferredToBy:
++HasMember:
++MemberOf:
+
 CustomField-C<CFName>:
 CF-C<CFName>:
 
@@ -128,7 +137,7 @@ sub GetCurrentUser {
             my $date = RT::Date->new( $args{'CurrentUser'} );
             $date->Set(
                 Format => 'unknown',
-                value  => $cmds{ lc $attribute }
+                Value  => $cmds{ lc $attribute }
             );
             _SetAttribute( $ticket_as_user, $attribute, $date->ISO,
                 \%results );
@@ -200,43 +209,38 @@ sub GetCurrentUser {
         }
 
         # Canonicalize links
-        foreach my $attr (@LINK_ATTRIBUTES) {
-            $create_args{$attr} = $cmds{lc $attr};
-
-        }
+        %create_args = (
+            %create_args,
+            _CompileAdditiveForCreate( _ParseAdditiveCommand(
+                \%cmds, 0, @LINK_ATTRIBUTES
+            ) ),
+        );
 
         # Canonicalize custom fields
         while ( my $cf = $custom_fields->Next ) {
             next unless ( exists $cmds{ lc $cf->Name } );
             $create_args{ 'CustomField-' . $cf->id } = $cmds{ lc $cf->Name };
-
         }
 
         # Canonicalize watchers
         # First of all fetch default values
-        $create_args{'Requestor'} = [ $args{'CurrentUser'}->id ];
-        $create_args{'Cc'} = [
-            ParseCcAddressesFromHead(
-                Head        => $args{'Message'}->head,
-                CurrentUser => $args{'CurrentUser'},
-                QueueObj    => $args{'Queue'},
-            )
-        ] if $RT::ParseNewMessageForTicketCcs;
+        {
+            my %tmp = _ParseAdditiveCommand(
+                \%cmds, 1, qw(Requestor Cc AdminCc)
+            );
+            $tmp{'Requestor'}->{'Default'} = [ $args{'CurrentUser'}->id ];
+            $tmp{'Requestor'}->{'Cc'} = [
+                ParseCcAddressesFromHead(
+                    Head        => $args{'Message'}->head,
+                    CurrentUser => $args{'CurrentUser'},
+                    QueueObj    => $args{'Queue'},
+                )
+            ] if $RT::ParseNewMessageForTicketCcs;
 
-        foreach my $base_type (qw(Requestor Cc AdminCc)) {
-            foreach my $type (
-                $base_type,
-                "Add" . $base_type,
-                $base_type . "s",
-                "Add" . $base_type . "s" )
-            {
-                next unless exists $cmds{ lc $type };
-                if ( $base_type =~ /^\Q$type\Es?$/ ) {
-                    $create_args{ lc $base_type } = [ $cmds{ lc $type } ];
-                } else {
-                    push @{ $create_args{ lc $base_type } }, $cmds{ lc $type };
-                }
-            }
+            %create_args = (
+                %create_args,
+                _CompileAdditiveForCreate( %tmp ),
+            );
         }
 
         # get queue unless mail contain it
@@ -252,7 +256,10 @@ sub GetCurrentUser {
         # ticket
         warn YAML::Dump( \%create_args );
 
-        my ( $id, $txn_id, $msg ) = $ticket_as_user->Create( %create_args, MIMEObj => $args{'Message'} );
+        my ( $id, $txn_id, $msg ) = $ticket_as_user->Create(
+            %create_args,
+            MIMEObj => $args{'Message'}
+        );
         unless ( $id ) {
             $RT::Logger->error("Couldn't create ticket, fallback to standard mailgate: $msg");
             return ($args{'CurrentUser'}, $args{'AuthLevel'});
@@ -263,6 +270,53 @@ sub GetCurrentUser {
         return ( $args{'CurrentUser'}, -1 );
 
     }
+}
+
+sub _ParseAdditiveCommand {
+    my ($cmds, $plural_forms, @bases) = @_;
+    my (%res);
+    foreach my $base (@bases) {
+        my @types = $base;
+        push @types, $base.'s' if $plural_forms;
+        push @types, 'Add'. $base;
+        push @types, 'Add'. $base .'s' if $plural_forms;
+        push @types, 'Del'. $base;
+        push @types, 'Del'. $base .'s' if $plural_forms;
+
+        foreach my $type ( @types ) {
+            next unless defined $cmds->{lc $type};
+
+            my @values = ref $cmds->{lc $type} eq 'ARRAY'?
+                @{ $cmds->{lc $type} }: $cmds->{lc $type};
+
+            if ( $type =~ /^\Q$base\Es?/ ) {
+                push @{ $res{ $base }->{'Set'} }, @values;
+            } elsif ( $type =~ /^Add/ ) {
+                push @{ $res{ $base }->{'Add'} }, @values;
+            } else {
+                push @{ $res{ $base }->{'Del'} }, @values;
+            }
+        }
+    }
+    return %res;
+}
+
+sub _CompileAdditiveForCreate {
+    my %cmds = @_;
+    my %res;
+    while ( my ($type, $value) = each %cmds ) {
+        my @list;
+        @list = @{ $value->{'Default'} } if $value->{'Default'} && !$value->{'Set'};
+        @list = @{ $value->{'Set'} } if $value->{'Set'};
+        push @list, @{ $value->{'Add'} } if $value->{'Add'};
+        if ( $value->{'Del'} ) {
+            my %seen;
+            $seen{$_} = 1 foreach @{ $value->{'Del'} };
+            @list = grep !$seen{$_}, @list;
+        }
+        $res{ $type } = \@list;
+    }
+    return %res;
 }
 
 sub _SetAttribute {
