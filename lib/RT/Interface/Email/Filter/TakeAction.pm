@@ -4,9 +4,9 @@ use warnings;
 use strict;
 
 our @REGULAR_ATTRIBUTES = qw(Queue Status Priority FinalPriority
-    TimeWorked TimeLeft TimeEstimated Subject );
-our @DATE_ATTRIBUTES = qw(Due Starts Started Resolved Told);
-            our @LINK_ATTRIBUTES = qw(MemberOf Parents Members Children
+                             TimeWorked TimeLeft TimeEstimated Subject );
+our @DATE_ATTRIBUTES    = qw(Due Starts Started Resolved Told);
+our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
             HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
 
 =head2 my commands
@@ -153,9 +153,17 @@ sub GetCurrentUser {
                 }
             }
         }
-        for (@LINK_ATTRIBUTES) {
-
-            die "Haven't handled links yet"
+        foreach my $type ( @LINK_ATTRIBUTES ) {
+            next unless $cmds{ lc $type };
+            my ($val, $msg) = $ticket_as_user->AddLink(
+                Type => $ticket_as_user->LINKTYPEMAP->{$type}->{'Type'},
+                Link => $cmds{ lc $type },
+            );
+            $results{ $type } = {
+                value => $cmds{ lc $type },
+                result => $val,
+                message => $msg,
+            };
         }
 
         while ( my $cf = $custom_fields->Next ) {
@@ -196,6 +204,7 @@ sub GetCurrentUser {
             $create_args{$attr} = $cmds{lc $attr};
 
         }
+
         # Canonicalize custom fields
         while ( my $cf = $custom_fields->Next ) {
             next unless ( exists $cmds{ lc $cf->Name } );
@@ -204,37 +213,52 @@ sub GetCurrentUser {
         }
 
         # Canonicalize watchers
+        # First of all fetch default values
+        $create_args{'Requestor'} = [ $args{'CurrentUser'}->id ];
+        $create_args{'Cc'} = [
+            ParseCcAddressesFromHead(
+                Head        => $args{'Message'}->head,
+                CurrentUser => $args{'CurrentUser'},
+                QueueObj    => $args{'Queue'},
+            )
+        ] if $RT::ParseNewMessageForTicketCcs;
 
         foreach my $base_type (qw(Requestor Cc AdminCc)) {
             foreach my $type (
                 $base_type,
                 "Add" . $base_type,
                 $base_type . "s",
-                "Add" . $base_type . "s"
-                ) {
-                next unless ( exists $cmds{ lc $type } );
-                push @{ $create_args{ lc $base_type } }, $cmds{ lc $type };
-
+                "Add" . $base_type . "s" )
+            {
+                next unless exists $cmds{ lc $type };
+                if ( $base_type =~ /^\Q$type\Es?$/ ) {
+                    $create_args{ lc $base_type } = [ $cmds{ lc $type } ];
+                } else {
+                    push @{ $create_args{ lc $base_type } }, $cmds{ lc $type };
+                }
             }
         }
 
         # get queue unless mail contain it
+        $create_args{'Queue'} = $args{'Queue'}->Id unless exists $create_args{'Queue'};
 
-        $create_args{'Queue'} = $args{'Queue'} unless exists $create_args{'Queue'};
+        # subject
+        unless ( $create_args{'Subject'} ) {
+            $create_args{'Subject'} = $args{'Message'}->head->get('Subject');
+            chomp $create_args{'Subject'};
+        }
 
         # If we don't already have a ticket, we're going to create a new
         # ticket
-        
-
         warn YAML::Dump( \%create_args );
 
-        my ( $id, $txn_id, $msg ) = $ticket_as_user->Create( %create_args );
+        my ( $id, $txn_id, $msg ) = $ticket_as_user->Create( %create_args, MIMEObj => $args{'Message'} );
         unless ( $id ) {
             $RT::Logger->error("Couldn't create ticket, fallback to standard mailgate: $msg");
             return ($args{'CurrentUser'}, $args{'AuthLevel'});
         }
 
-       # now that we've created a ticket, we abort so we don't create another.
+        # now that we've created a ticket, we abort so we don't create another.
         $args{'Ticket'}->Load($id);
         return ( $args{'CurrentUser'}, -1 );
 
@@ -286,7 +310,7 @@ sub _ReportResults {
     my $report_msg = '';
 
     foreach my $key (keys %$report) {
-#        $report_msg .= $key.":".$report->{$key}->{$value};
+#        $report_msg .= $key.":".$report->{$key}->{'value'};
     }
 
 
