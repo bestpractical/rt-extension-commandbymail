@@ -97,7 +97,8 @@ sub GetCurrentUser {
     while ( my $key = lc shift @items ) {
         my $val = shift @items;
         $val =~ s/^\s+|\s+$//g; # strip leading and trailing spaces
-        if ( $key =~ /^(?:Add|Del)/i ) {
+        if ( exists $cmds{$key} ) {
+            $cmds{$key} = [ $cmds{$key} ] unless ref $cmds{$key};
             push @{ $cmds{$key} }, $val;
         } else {
             $cmds{$key} = $val;
@@ -144,24 +145,38 @@ sub GetCurrentUser {
             $results{ lc $attribute }->{value} = $cmds{ lc $attribute };
         }
 
-        foreach my $base_attribute (qw(Requestor Cc AdminCc)) {
-            foreach my $attribute ( $base_attribute, $base_attribute . "s" ) {
-                if ( my $delete = $cmds{ lc "del" . $attribute } ) {
-                    foreach my $email (@$delete) {
-                        _SetWatcherAttribute( $ticket_as_user, "DelWatcher",
-                            "del" . $attribute,
-                            $base_attribute, $email );
-                    }
-                    if ( my $add = $cmds{ lc "add" . $attribute } ) {
-                        foreach my $email (@$add) {
-                            _SetWatcherAttribute( $ticket_as_user,
-                                "AddWatcher", "add" . $attribute,
-                                $base_attribute, $email );
-                        }
-                    }
-                }
+        foreach my $type ( qw(Requestor Cc AdminCc) ) {
+            my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
+            $tmp{'Default'} = [ do {
+                my $method = $type;
+                $method .= 's' if $type eq 'Requestor';
+                $args{'Ticket'}->$method->MemberEmailAddresses;
+            } ];
+            my ($add, $del) = _CompileAdditiveForUpdate( %tmp );
+            foreach ( @$del ) {
+                my ( $val, $msg ) = $ticket_as_user->DeleteWatcher(
+                    Type  => $type,
+                    Email => $_,
+                );
+                push @{ $results{ 'Del'. $type } }, {
+                    value   => $_,
+                    result  => $val,
+                    message => $msg
+                };
+            }
+            foreach ( @$add ) {
+                my ( $val, $msg ) = $ticket_as_user->AddWatcher(
+                    Type  => $type,
+                    Email => $_,
+                );
+                push @{ $results{ 'Add'. $type } }, {
+                    value   => $_,
+                    result  => $val,
+                    message => $msg
+                };
             }
         }
+
         foreach my $type ( @LINK_ATTRIBUTES ) {
             next unless $cmds{ lc $type };
             my ($val, $msg) = $ticket_as_user->AddLink(
@@ -187,6 +202,7 @@ sub GetCurrentUser {
                 message => $msg
             };
         }
+        warn YAML::Dump(\%results);
         return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
 
     } else {
@@ -209,12 +225,11 @@ sub GetCurrentUser {
         }
 
         # Canonicalize links
-        %create_args = (
-            %create_args,
-            _CompileAdditiveForCreate( _ParseAdditiveCommand(
-                \%cmds, 0, @LINK_ATTRIBUTES
-            ) ),
-        );
+        foreach my $type ( @LINK_ATTRIBUTES ) {
+            $create_args{ $type } = [ _CompileAdditiveForCreate( 
+                _ParseAdditiveCommand( \%cmds, 0, $type ),
+            ) ];
+        }
 
         # Canonicalize custom fields
         while ( my $cf = $custom_fields->Next ) {
@@ -224,23 +239,18 @@ sub GetCurrentUser {
 
         # Canonicalize watchers
         # First of all fetch default values
-        {
-            my %tmp = _ParseAdditiveCommand(
-                \%cmds, 1, qw(Requestor Cc AdminCc)
-            );
-            $tmp{'Requestor'}->{'Default'} = [ $args{'CurrentUser'}->id ];
-            $tmp{'Requestor'}->{'Cc'} = [
+        foreach my $type ( qw(Requestor Cc AdminCc) ) {
+            my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
+            $tmp{'Default'} = [ $args{'CurrentUser'}->id ] if $type eq 'Requestor';
+            $tmp{'Default'} = [
                 ParseCcAddressesFromHead(
                     Head        => $args{'Message'}->head,
                     CurrentUser => $args{'CurrentUser'},
                     QueueObj    => $args{'Queue'},
                 )
-            ] if $RT::ParseNewMessageForTicketCcs;
+            ] if $type eq 'Cc' && $RT::ParseNewMessageForTicketCcs;
 
-            %create_args = (
-                %create_args,
-                _CompileAdditiveForCreate( %tmp ),
-            );
+            $create_args{ $type } = [ _CompileAdditiveForCreate( %tmp ) ];
         }
 
         # get queue unless mail contain it
@@ -273,50 +283,73 @@ sub GetCurrentUser {
 }
 
 sub _ParseAdditiveCommand {
-    my ($cmds, $plural_forms, @bases) = @_;
+    my ($cmds, $plural_forms, $base) = @_;
     my (%res);
-    foreach my $base (@bases) {
-        my @types = $base;
-        push @types, $base.'s' if $plural_forms;
-        push @types, 'Add'. $base;
-        push @types, 'Add'. $base .'s' if $plural_forms;
-        push @types, 'Del'. $base;
-        push @types, 'Del'. $base .'s' if $plural_forms;
 
-        foreach my $type ( @types ) {
-            next unless defined $cmds->{lc $type};
+    my @types = $base;
+    push @types, $base.'s' if $plural_forms;
+    push @types, 'Add'. $base;
+    push @types, 'Add'. $base .'s' if $plural_forms;
+    push @types, 'Del'. $base;
+    push @types, 'Del'. $base .'s' if $plural_forms;
 
-            my @values = ref $cmds->{lc $type} eq 'ARRAY'?
-                @{ $cmds->{lc $type} }: $cmds->{lc $type};
+    foreach my $type ( @types ) {
+        next unless defined $cmds->{lc $type};
 
-            if ( $type =~ /^\Q$base\Es?/ ) {
-                push @{ $res{ $base }->{'Set'} }, @values;
-            } elsif ( $type =~ /^Add/ ) {
-                push @{ $res{ $base }->{'Add'} }, @values;
-            } else {
-                push @{ $res{ $base }->{'Del'} }, @values;
-            }
+        my @values = ref $cmds->{lc $type} eq 'ARRAY'?
+            @{ $cmds->{lc $type} }: $cmds->{lc $type};
+
+        if ( $type =~ /^\Q$base\Es?/ ) {
+            push @{ $res{'Set'} }, @values;
+        } elsif ( $type =~ /^Add/ ) {
+            push @{ $res{'Add'} }, @values;
+        } else {
+            push @{ $res{'Del'} }, @values;
         }
     }
+
+    warn YAML::Dump( {ParseAdditiveCommand => \%res});
+
     return %res;
 }
 
 sub _CompileAdditiveForCreate {
-    my %cmds = @_;
-    my %res;
-    while ( my ($type, $value) = each %cmds ) {
-        my @list;
-        @list = @{ $value->{'Default'} } if $value->{'Default'} && !$value->{'Set'};
-        @list = @{ $value->{'Set'} } if $value->{'Set'};
-        push @list, @{ $value->{'Add'} } if $value->{'Add'};
-        if ( $value->{'Del'} ) {
-            my %seen;
-            $seen{$_} = 1 foreach @{ $value->{'Del'} };
-            @list = grep !$seen{$_}, @list;
-        }
-        $res{ $type } = \@list;
+    my %cmd = @_;
+    my @list;
+    @list = @{ $cmd{'Default'} } if $cmd{'Default'} && !$cmd{'Set'};
+    @list = @{ $cmd{'Set'} } if $cmd{'Set'};
+    push @list, @{ $cmd{'Add'} } if $cmd{'Add'};
+    if ( $cmd{'Del'} ) {
+        my %seen;
+        $seen{$_} = 1 foreach @{ $cmd{'Del'} };
+        @list = grep !$seen{$_}, @list;
     }
-    return %res;
+    return @list;
+}
+
+sub _CompileAdditiveForUpdate {
+    my %cmd = @_;
+
+    my @new = _CompileAdditiveForCreate( %cmd );
+
+    my ($add, $del);
+    if ( !$cmd{'Default'} ) {
+        $add = \@new;
+    } elsif ( !@new ) {
+        $del = $cmd{'Default'};
+    } else {
+        my (%cur, %new);
+        $cur{$_} = 1 foreach @{ $cmd{'Default'} };
+        $new{$_} = 1 foreach @new;
+        my %tmp;
+        $add = [ grep !$cur{$_}, @new ];
+        $del = [ grep !$new{$_}, @{ $cmd{'Default'} } ];
+    }
+    foreach ($add, $del) {
+        $_ = [] unless $_;
+    }
+    warn YAML::Dump( {CompileForUpdate => [$add, $del]});
+    return $add, $del;
 }
 
 sub _SetAttribute {
