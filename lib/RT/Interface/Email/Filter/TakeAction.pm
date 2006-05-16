@@ -45,8 +45,12 @@ TimeLeft: <minutes>
 +HasMember:
 +MemberOf:
 
-CustomField-C<CFName>:
-CF-C<CFName>:
+CustomField{C<CFName>}:
+AddCustomField{C<CFName>}:
+DelCustomField{C<CFName>}:
+CF{C<CFName>}:
+AddCF{C<CFName>}:
+DelCF{C<CFName>}:
 
 =cut
 
@@ -117,8 +121,6 @@ sub GetCurrentUser {
         $queue->Load( $args{'Queue'}->id );
     }
 
-    my $custom_fields = $queue->TicketCustomFields;
-
     # If we're updating.
     if ( $args{'Ticket'}->id ) {
         $ticket_as_user->Load( $args{'Ticket'}->id );
@@ -178,18 +180,48 @@ sub GetCurrentUser {
         }
 
         foreach my $type ( @LINK_ATTRIBUTES ) {
-            next unless $cmds{ lc $type };
-            my ($val, $msg) = $ticket_as_user->AddLink(
-                Type => $ticket_as_user->LINKTYPEMAP->{$type}->{'Type'},
-                Link => $cmds{ lc $type },
-            );
-            $results{ $type } = {
-                value => $cmds{ lc $type },
-                result => $val,
-                message => $msg,
-            };
+            my $link_type = $ticket_as_user->LINKTYPEMAP->{ $type }->{'Type'};
+            my $link_mode = $ticket_as_user->LINKTYPEMAP->{ $type }->{'Mode'};
+
+            my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
+            $tmp{'Default'} = [ do {
+                my $links = $args{'Ticket'}->_Links( $link_mode, $link_type );
+                my %h = ( Base => 'Target', Target => 'Base' );
+                my @res;
+                while ( my $link = $links->Next ) {
+                    my $method = $h{$link_mode} .'URI';
+                    my $uri = $link->$method();
+                    next unless $uri->IsLocal;
+                    push @res, $uri->Object->Id;
+                }
+                @res;
+            } ];
+            my ($add, $del) = _CompileAdditiveForUpdate( %tmp );
+            foreach ( @$del ) {
+                my ($val, $msg) = $ticket_as_user->DeleteLink(
+                    Type => $link_type,
+                    $link_mode => $_,
+                );
+                $results{ $type } = {
+                    value => $_,
+                    result => $val,
+                    message => $msg,
+                };
+            }
+            foreach ( @$add ) {
+                my ($val, $msg) = $ticket_as_user->AddLink(
+                    Type => $link_type,
+                    $link_mode => $_,
+                );
+                $results{ $type } = {
+                    value => $_,
+                    result => $val,
+                    message => $msg,
+                };
+            }
         }
 
+        my $custom_fields = $queue->TicketCustomFields;
         while ( my $cf = $custom_fields->Next ) {
             next unless ( defined $cmds{ lc $cf->Name } );
             my ( $val, $msg ) = $ticket_as_user->AddCustomFieldValue(
@@ -232,6 +264,7 @@ sub GetCurrentUser {
         }
 
         # Canonicalize custom fields
+        my $custom_fields = $queue->TicketCustomFields;
         while ( my $cf = $custom_fields->Next ) {
             next unless ( exists $cmds{ lc $cf->Name } );
             $create_args{ 'CustomField-' . $cf->id } = $cmds{ lc $cf->Name };
