@@ -3,13 +3,20 @@ package RT::Interface::Email::Filter::TakeAction;
 use warnings;
 use strict;
 
+use YAML;
+
 our @REGULAR_ATTRIBUTES = qw(Queue Status Priority FinalPriority
                              TimeWorked TimeLeft TimeEstimated Subject );
 our @DATE_ATTRIBUTES    = qw(Due Starts Started Resolved Told);
 our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
             HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
 
-=head2 my commands
+=head2 COMMANDS
+
+This mail action supports several commands to manipulate tickets'
+metadata from emails.
+
+=head3 Basic
 
 Queue: <name> Set new queue for the ticket
 Subject: <string> Set new subject to the given string
@@ -18,6 +25,17 @@ resolved, rejected or deleted
 Owner: <username> Set new owner using the given username
 Priority: <#> Set new priority to the given value (1-99)
 FinalPriority: <#> Set new final priority to the given value (1-99)
+
+=head3 Dates and time
+
+Due: <new timestamp> Set new due date/timestamp, or 0 to disable.
+Starts: <new timestamp>
+Started: <new timestamp>
+TimeWorked: <minutes> Replace the tickets 'timeworked' value.
+TimeEstimated: <minutes>
+TimeLeft: <minutes>
+
+=head3 Watchers
 
 +Requestor: <address> Set requestor(s) using the email address
 +AddRequestor: <address> Add new requestor using the email address
@@ -29,12 +47,7 @@ FinalPriority: <#> Set new final priority to the given value (1-99)
 +AddAdminCc: <address> Add new AdminCc watcher using the email address
 +DelAdminCc: <address> Remove email address as AdminCc watcher
 
-Due: <new timestamp> Set new due date/timestamp, or 0 to disable.
-Starts: <new timestamp>
-Started: <new timestamp>
-TimeWorked: <minutes> Replace the tickets 'timeworked' value.
-TimeEstimated: <minutes>
-TimeLeft: <minutes>
+=head3 Links
 
 +DependsOn:
 +AddDependsOn:
@@ -45,12 +58,14 @@ TimeLeft: <minutes>
 +HasMember:
 +MemberOf:
 
-CustomField.{C<CFName>}:
-AddCustomField.{C<CFName>}:
-DelCustomField.{C<CFName>}:
-CF.{C<CFName>}:
-AddCF.{C<CFName>}:
-DelCF.{C<CFName>}:
+=head3 Custom field values
+
++CustomField.{C<CFName>}:
++AddCustomField.{C<CFName>}:
++DelCustomField.{C<CFName>}:
++CF.{C<CFName>}:
++AddCF.{C<CFName>}:
++DelCF.{C<CFName>}:
 
 =cut
 
@@ -66,35 +81,35 @@ sub GetCurrentUser {
         @_
     );
 
-    warn "We're in it";
+    unless ( $args{'CurrentUser'} ) {
+        $RT::Logger->error(
+            "Filter::TakeAction executed when "
+            ."CurrentUser (actor) is not authorized. "
+            ."Most probably you want to add Auth::MailFrom plugin before."
+        );
+        return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
+    }
 
     # If the user isn't asking for a comment or a correspond,
     # bail out
-    if ( $args{'Action'} !~ /^(?:comment|correspond)$/i ) {
-        warn "bad action";
+    unless ( $args{'Action'} =~ /^(?:comment|correspond)$/i ) {
         return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
     }
 
     my @content;
-    warn "after the action";
     my @parts = $args{'Message'}->parts_DFS;
     foreach my $part (@parts) {
 
         #if it looks like it has pseudoheaders, that's our content
         if ( $part->stringify_body =~ /^(?:\S+):/m ) {
-            warn "Got it";
             @content = $part->bodyhandle->as_lines();
-
             last;
         }
-
     }
-    use YAML;
-    warn YAML::Dump( \@content );
-    warn "walking lines";
+
     my @items;
     foreach my $line (@content) {
-        last if ( $line !~ /^(?:(\S+)\s*?:\s*?(.*)\s*?|)$/ );
+        last if $line !~ /^(?:(\S+)\s*?:\s*?(.*)\s*?|)$/;
         push( @items, $1 => $2 );
     }
     my %cmds;
@@ -230,7 +245,6 @@ sub GetCurrentUser {
 
         my $custom_fields = $queue->TicketCustomFields;
         while ( my $cf = $custom_fields->Next ) {
-            warn "Updating CF ". $cf->Name;
             my %tmp = _ParseAdditiveCommand( \%cmds, 0, "CustomField{". $cf->Name ."}" );
             next unless keys %tmp;
 
@@ -266,12 +280,15 @@ sub GetCurrentUser {
                 };
             }
         }
-        warn YAML::Dump(\%results);
+
+        _ReportResults(
+            Ticket => $args{'Ticket'},
+            Results => \%results,
+            Message => $args{'Message'}
+        );
         return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
 
     } else {
-
-        warn "Create new ticket";
 
         my %create_args = ();
         foreach my $attr (@REGULAR_ATTRIBUTES) {
@@ -337,14 +354,22 @@ sub GetCurrentUser {
             MIMEObj => $args{'Message'}
         );
         unless ( $id ) {
-            $RT::Logger->error("Couldn't create ticket, fallback to standard mailgate: $msg");
+            $msg = "Couldn't create ticket from message with commands, ".
+                   "fallback to standard mailgate.\n\nError: $msg";
+            $RT::Logger->error( $msg );
+            $results{'Create'} = {
+                result => $id,
+                message => $msg,
+            };
+
+            _ReportResults( Results => \%results, Message => $args{'Message'} );
+
             return ($args{'CurrentUser'}, $args{'AuthLevel'});
         }
 
         # now that we've created a ticket, we abort so we don't create another.
-        $args{'Ticket'}->Load($id);
-        return ( $args{'CurrentUser'}, -1 );
-
+        $args{'Ticket'}->Load( $id );
+        return ( $args{'CurrentUser'}, -2 );
     }
 }
 
@@ -373,8 +398,6 @@ sub _ParseAdditiveCommand {
             push @{ $res{'Del'} }, @values;
         }
     }
-
-    warn YAML::Dump( {ParseAdditiveCommand => \%res});
 
     return %res;
 }
@@ -411,10 +434,7 @@ sub _CompileAdditiveForUpdate {
         $add = [ grep !$cur{$_}, @new ];
         $del = [ grep !$new{$_}, @{ $cmd{'Default'} } ];
     }
-    foreach ($add, $del) {
-        $_ = [] unless $_;
-    }
-    warn YAML::Dump( {CompileForUpdate => [$add, $del]});
+    $_ ||= [] foreach ($add, $del);
     return $add, $del;
 }
 
@@ -436,7 +456,7 @@ sub _SetAttribute {
 sub _CanonicalizeCommand {
     my $key = shift;
     # CustomField commands
-    $key =~ s/^(add|del|)c(?:field)?-?f(?:ield)?\.?[({\[](.*)[)}\]]$/$1customfield{$2}/i;
+    $key =~ s/^(add|del|)c(?:ustom)?-?f(?:ield)?\.?[({\[](.*)[)}\]]$/$1customfield{$2}/i;
     return $key;
 }
 
@@ -463,17 +483,28 @@ sub _SetWatcherAttribute {
 
 
 sub _ReportResults {
-    my $report = shift;
-    my $recipient = shift;
+    my %args = ( Ticket => undef, Message => undef, Results => {}, @_ );
 
-    my $report_msg = '';
-
-    foreach my $key ( keys %$report ) {
-        unless $result
-#        $report_msg .= $key.":".$report->{$key}->{'value'};
+    my $msg = '';
+    unless ( $args{'Ticket'} ) {
+        $msg .= $args{'Results'}->{'Create'}->{message};
+    } else {
+        foreach my $key ( keys %{ $args{'Results'} } ) {
+            next if $args{'Results'}->{$key}->{'result'};
+            $msg .= "Failed command ". $key .":". $args{'Results'}->{$key}->{'value'} ."\n";
+            $msg .= "Error message ". $args{'Results'}->{ $key }->{'message'} ."\n\n";
+        }
     }
+    return unless $msg;
 
-
+    my $ErrorsTo = RT::Interface::Email::ParseErrorsToAddressFromHead( $args{'Message'}->head );
+    RT::Interface::Email::MailError(
+        To          => $ErrorsTo,
+        Subject     => "Extended mailgate error",
+        Explanation => $msg,
+        MIMEObj     => $args{'Message'},
+    );
+    return;
 }
 
 1;
