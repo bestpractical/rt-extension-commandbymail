@@ -99,8 +99,14 @@ sub GetCurrentUser {
     }
     my %cmds;
     while ( my $key = lc shift @items ) {
+        # canonicalize CF commands
+        $key =~ s/^(add|del|)cf/$1customfield/i;
+
         my $val = shift @items;
-        $val =~ s/^\s+|\s+$//g; # strip leading and trailing spaces
+
+        # strip leading and trailing spaces
+        $val =~ s/^\s+|\s+$//g;
+
         if ( exists $cmds{$key} ) {
             $cmds{$key} = [ $cmds{$key} ] unless ref $cmds{$key};
             push @{ $cmds{$key} }, $val;
@@ -108,6 +114,7 @@ sub GetCurrentUser {
             $cmds{$key} = $val;
         }
     }
+    warn YAML::Dump( { Commands => \%cmds } );
 
     my %results;
 
@@ -149,6 +156,8 @@ sub GetCurrentUser {
 
         foreach my $type ( qw(Requestor Cc AdminCc) ) {
             my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
+            next unless keys %tmp;
+
             $tmp{'Default'} = [ do {
                 my $method = $type;
                 $method .= 's' if $type eq 'Requestor';
@@ -180,10 +189,12 @@ sub GetCurrentUser {
         }
 
         foreach my $type ( @LINK_ATTRIBUTES ) {
+            my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
+            next unless keys %tmp;
+
             my $link_type = $ticket_as_user->LINKTYPEMAP->{ $type }->{'Type'};
             my $link_mode = $ticket_as_user->LINKTYPEMAP->{ $type }->{'Mode'};
 
-            my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
             $tmp{'Default'} = [ do {
                 my $links = $args{'Ticket'}->_Links( $link_mode, $link_type );
                 my %h = ( Base => 'Target', Target => 'Base' );
@@ -202,7 +213,7 @@ sub GetCurrentUser {
                     Type => $link_type,
                     $link_mode => $_,
                 );
-                $results{ $type } = {
+                $results{ 'Del'. $type } = {
                     value => $_,
                     result => $val,
                     message => $msg,
@@ -213,7 +224,7 @@ sub GetCurrentUser {
                     Type => $link_type,
                     $link_mode => $_,
                 );
-                $results{ $type } = {
+                $results{ 'Add'. $type } = {
                     value => $_,
                     result => $val,
                     message => $msg,
@@ -223,16 +234,41 @@ sub GetCurrentUser {
 
         my $custom_fields = $queue->TicketCustomFields;
         while ( my $cf = $custom_fields->Next ) {
-            next unless ( defined $cmds{ lc $cf->Name } );
-            my ( $val, $msg ) = $ticket_as_user->AddCustomFieldValue(
-                Field => $cf->id,
-                Value => $cmds{ lc $cf->Name }
-            );
-            $results{ $cf->Name } = {
-                value   => $cmds{ lc $cf->Name },
-                result  => $val,
-                message => $msg
-            };
+            warn "Updating CF ". $cf->Name;
+            my %tmp = _ParseAdditiveCommand( \%cmds, 0, "CustomField{". $cf->Name ."}" );
+            next unless keys %tmp;
+
+            $tmp{'Default'} = [ do {
+                my $values = $args{'Ticket'}->CustomFieldValues( $cf->id );
+                my @res;
+                while ( my $value = $values->Next ) {
+                    push @res, $value->Content;
+                }
+                @res;
+            } ];
+            my ($add, $del) = _CompileAdditiveForUpdate( %tmp );
+            foreach ( @$del ) {
+                my ( $val, $msg ) = $ticket_as_user->DeleteCustomFieldValue(
+                    Field => $cf->id,
+                    Value => $_
+                );
+                $results{ "DelCustomField{". $cf->Name ."}" } = {
+                    value => $_,
+                    result => $val,
+                    message => $msg,
+                };
+            }
+            foreach ( @$add ) {
+                my ( $val, $msg ) = $ticket_as_user->AddCustomFieldValue(
+                    Field => $cf->id,
+                    Value => $_
+                );
+                $results{ "DelCustomField{". $cf->Name ."}" } = {
+                    value => $_,
+                    result => $val,
+                    message => $msg,
+                };
+            }
         }
         warn YAML::Dump(\%results);
         return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
@@ -266,8 +302,9 @@ sub GetCurrentUser {
         # Canonicalize custom fields
         my $custom_fields = $queue->TicketCustomFields;
         while ( my $cf = $custom_fields->Next ) {
-            next unless ( exists $cmds{ lc $cf->Name } );
-            $create_args{ 'CustomField-' . $cf->id } = $cmds{ lc $cf->Name };
+            my %tmp = _ParseAdditiveCommand( \%cmds, 0, "CustomField{". $cf->Name ."}" );
+            next unless keys %tmp;
+            $create_args{ 'CustomField-' . $cf->id } = [ _CompileAdditiveForCreate(%tmp) ];
         }
 
         # Canonicalize watchers
