@@ -45,12 +45,12 @@ TimeLeft: <minutes>
 +HasMember:
 +MemberOf:
 
-CustomField{C<CFName>}:
-AddCustomField{C<CFName>}:
-DelCustomField{C<CFName>}:
-CF{C<CFName>}:
-AddCF{C<CFName>}:
-DelCF{C<CFName>}:
+CustomField.{C<CFName>}:
+AddCustomField.{C<CFName>}:
+DelCustomField.{C<CFName>}:
+CF.{C<CFName>}:
+AddCF.{C<CFName>}:
+DelCF.{C<CFName>}:
 
 =cut
 
@@ -98,12 +98,8 @@ sub GetCurrentUser {
         push( @items, $1 => $2 );
     }
     my %cmds;
-    while ( my $key = lc shift @items ) {
-        # canonicalize CF commands
-        $key =~ s/^(add|del|)cf/$1customfield/i;
-
+    while ( my $key = _CanonicalizeCommand( lc shift @items ) ) {
         my $val = shift @items;
-
         # strip leading and trailing spaces
         $val =~ s/^\s+|\s+$//g;
 
@@ -436,7 +432,13 @@ sub _SetAttribute {
     };
 
 }
-1;
+
+sub _CanonicalizeCommand {
+    my $key = shift;
+    # CustomField commands
+    $key =~ s/^(add|del|)c(?:field)?-?f(?:ield)?\.?[({\[](.*)[)}\]]$/$1customfield{$2}/i;
+    return $key;
+}
 
 sub _SetWatcherAttribute {
     my $ticket    = shift;
@@ -466,10 +468,12 @@ sub _ReportResults {
 
     my $report_msg = '';
 
-    foreach my $key (keys %$report) {
+    foreach my $key ( keys %$report ) {
+        unless $result
 #        $report_msg .= $key.":".$report->{$key}->{'value'};
     }
 
 
 }
+
 1;
