@@ -3,8 +3,6 @@ package RT::Interface::Email::Filter::TakeAction;
 use warnings;
 use strict;
 
-use YAML;
-
 our @REGULAR_ATTRIBUTES = qw(Queue Status Priority FinalPriority
                              TimeWorked TimeLeft TimeEstimated Subject );
 our @DATE_ATTRIBUTES    = qw(Due Starts Started Resolved Told);
@@ -125,7 +123,6 @@ sub GetCurrentUser {
             $cmds{$key} = $val;
         }
     }
-    warn YAML::Dump( { Commands => \%cmds } );
 
     my %results;
 
@@ -347,7 +344,6 @@ sub GetCurrentUser {
 
         # If we don't already have a ticket, we're going to create a new
         # ticket
-        warn YAML::Dump( \%create_args );
 
         my ( $id, $txn_id, $msg ) = $ticket_as_user->Create(
             %create_args,
