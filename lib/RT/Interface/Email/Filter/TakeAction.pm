@@ -493,6 +493,7 @@ sub _ReportResults {
     }
     return unless $msg;
 
+    $RT::Logger->warning( $msg );
     my $ErrorsTo = RT::Interface::Email::ParseErrorsToAddressFromHead( $args{'Message'}->head );
     RT::Interface::Email::MailError(
         To          => $ErrorsTo,
