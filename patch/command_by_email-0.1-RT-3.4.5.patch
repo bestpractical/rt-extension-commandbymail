@@ -512,7 +512,7 @@
  	}
  
          last if $AuthStat == -1;
-@@ -624,132 +646,60 @@
+@@ -624,132 +646,64 @@
  
          last if $AuthStat == -1;
      }
@@ -658,23 +658,26 @@
      }
  
 -    # }}}
--
-     my $Ticket = RT::Ticket->new($CurrentUser);
++    # strip actions we should skip
++    @actions = grep !$skip_action{$_}, @actions;
+ 
+-    my $Ticket = RT::Ticket->new($CurrentUser);
++    # if plugin's updated SystemTicket then update arguments
++    $args{'ticket'} = $SystemTicket->Id if $SystemTicket && $SystemTicket->Id;
  
 -    # {{{ If we don't have a ticket Id, we're creating a new ticket
 -    if ( (!$SystemTicket || !$SystemTicket->Id) && 
 -           grep /^(comment|correspond)$/, @actions ) {
--
++    my $Ticket = RT::Ticket->new($CurrentUser);
+ 
 -        # {{{ Create a new ticket
 +    if (( !$SystemTicket || !$SystemTicket->Id )
-+        && grep /^(comment|correspond)$/ && !$skip_action{$_},
-+        @actions
-+        )
++        && grep /^(comment|correspond)$/, @actions )
 +    {
  
          my @Cc;
          my @Requestors = ( $CurrentUser->id );
-@@ -776,38 +726,40 @@
+@@ -776,38 +730,39 @@
                  Explanation => $ErrStr,
                  MIMEObj     => $Message
              );
@@ -692,11 +695,10 @@
 -    }
 +    } else {
  
--    $Ticket->Load( $args{'ticket'} );
-+        $Ticket->Load( $SystemTicket->id );
+     $Ticket->Load( $args{'ticket'} );
      unless ( $Ticket->Id ) {
 -        my $message = "Could not find a ticket with id " . $args{'ticket'};
-+            my $error = "Could not find a ticket with id " . $SystemTicket->id || $args{'ticket'};
++            my $error = "Could not find a ticket with id " . $args{'ticket'};
          MailError(
              To          => $ErrorsTo,
              Subject     => "Message not recorded",
@@ -713,7 +715,6 @@
      # }}}
 -    foreach my $action( @actions ) {
 +    foreach my $action (@actions) {
-+        next if $skip_action{ $action };
 +
          #   If the action is comment, add a comment.
 -        if ( $action =~ /^(comment|correspond)$/i ) {
@@ -729,7 +730,7 @@
                  ( $status, $msg ) = $Ticket->Comment( MIMEObj => $Message );
              }
              unless ($status) {
-@@ -821,77 +773,196 @@
+@@ -821,77 +776,196 @@
                  );
                  return ( 0, "Message not recorded", $Ticket );
              }

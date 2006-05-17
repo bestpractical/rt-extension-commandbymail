@@ -1,0 +1,71 @@
+--- lib/RT/Interface/Email.pm	2006-05-17 06:05:17.000000000 +0400
++++ lib/RT/Interface/Email.pm	2006-05-17 06:29:42.000000000 +0400
+@@ -544,10 +544,9 @@
+ 
+     $args{'ticket'} ||= ParseTicketId($Subject);
+ 
+-    my $SystemTicket;
++    my $SystemTicket = RT::Ticket->new($RT::SystemUser);
+     my $Right = 'CreateTicket';
+     if ( $args{'ticket'} ) {
+-        $SystemTicket = RT::Ticket->new($RT::SystemUser);
+         $SystemTicket->Load( $args{'ticket'} );
+ 	# if there's an existing ticket, this must be a reply
+ 	$Right = 'ReplyToTicket';
+@@ -570,6 +569,10 @@
+ 
+     push @RT::MailPlugins, "Auth::MailFrom" unless @RT::MailPlugins;
+ 
++    # if plugin returns AuthStat -2 we skip action
++    # NOTE: this is experimental API and it would be changed
++    my %skip_action = ();
++
+     # Since this needs loading, no matter what
+ 
+     foreach (@RT::MailPlugins) {
+@@ -604,11 +607,12 @@
+ 
+ 
+         # If a module returns a "-1" then we discard the ticket, so.
+-        $AuthStat = -1 if $NewAuthStat == -1;
++        $AuthStat = $NewAuthStat if $NewAuthStat == -1 or $NewAuthStat == -2;
+ 
+         # You get the highest level of authentication you were assigned.
+         $AuthStat = $NewAuthStat if $NewAuthStat > $AuthStat;
+         last if $AuthStat == -1;
++        $skip_action{ $args{'action'} }++ if $AuthStat == -2;
+     }
+ 
+     # {{{ If authentication fails and no new user was created, get out.
+@@ -730,7 +734,7 @@
+     my $Ticket = RT::Ticket->new($CurrentUser);
+ 
+     # {{{ If we don't have a ticket Id, we're creating a new ticket
+-    if ( !$SystemTicket || !$SystemTicket->Id) {
++    if ( (!$SystemTicket || !$SystemTicket->Id) && !$skip_action{ $args{'action'} } ) {
+ 
+         # {{{ Create a new ticket
+ 
+@@ -769,10 +773,10 @@
+     # }}}
+ 
+     #   If the action is comment, add a comment.
+-    elsif ( $args{'action'} =~ /^(comment|correspond)$/i ) {
+-        $Ticket->Load( $args{'ticket'} );
++    elsif ( $args{'action'} =~ /^(comment|correspond)$/i && !$skip_action{ $args{'action'} } ) {
++        $Ticket->Load( $SystemTicket->Id );
+         unless ( $Ticket->Id ) {
+-            my $message = "Could not find a ticket with id " . $args{'ticket'};
++            my $message = "Could not find a ticket with id " . $SystemTicket->Id || $args{'ticket'};
+             MailError(
+                 To          => $ErrorsTo,
+                 Subject     => "Message not recorded",
+@@ -803,7 +807,7 @@
+         }
+     }
+ 
+-    else {
++    elsif ( !$skip_action{ $args{'action'} } ) {
+ 
+         #Return mail to the sender with an error
+         MailError(
