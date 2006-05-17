@@ -1,0 +1,28 @@
+INSTALLATION
+
+To install this module, run the following commands:
+
+    perl Makefile.PL
+    make
+    make install
+
+PATCH
+
+This extension requres patching RT. Patch(es) is in patch directory.
+Apply patch with following commands:
+
+    cd /opt/rt3
+    patch -p0 <path/to/patch/command_by_mail-<patch version>-RT-<rt version>.patch
+
+You MUST apply patch in order to use this extension. Use patch with greatest <patch version>,
+old patches would be shipped with distribution to help you revert old patch(es) and apply new
+one on upgrades.
+
+CONFIGURE
+
+Add 'Filter::TakeAction' to the list of mail plugins in the RT config. Restart web server.
+Note that extension should be pushed into list after Auth::MailFrom or similar plugin that
+loads current user object.
+
+Enjoy.
+
