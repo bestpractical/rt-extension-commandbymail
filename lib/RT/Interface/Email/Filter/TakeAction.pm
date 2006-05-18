@@ -3,6 +3,8 @@ package RT::Interface::Email::Filter::TakeAction;
 use warnings;
 use strict;
 
+use RT::Interface::Email;
+
 our @REGULAR_ATTRIBUTES = qw(Queue Status Priority FinalPriority
                              TimeWorked TimeLeft TimeEstimated Subject );
 our @DATE_ATTRIBUTES    = qw(Due Starts Started Resolved Told);
@@ -400,8 +402,15 @@ sub _ParseAdditiveCommand {
 
 sub _CompileAdditiveForCreate {
     my %cmd = @_;
+
+    unless ( exists $cmd{'Default'} && defined $cmd{'Default'} ) {
+        $cmd{'Default'} = [];
+    } elsif ( ref $cmd{'Default'} ne 'ARRAY' ) {
+        $cmd{'Default'} = [ $cmd{'Default'} ];
+    }
+
     my @list;
-    @list = @{ $cmd{'Default'} } if $cmd{'Default'} && !$cmd{'Set'};
+    @list = @{ $cmd{'Default'} } unless $cmd{'Set'};
     @list = @{ $cmd{'Set'} } if $cmd{'Set'};
     push @list, @{ $cmd{'Add'} } if $cmd{'Add'};
     if ( $cmd{'Del'} ) {
@@ -417,8 +426,14 @@ sub _CompileAdditiveForUpdate {
 
     my @new = _CompileAdditiveForCreate( %cmd );
 
+    unless ( exists $cmd{'Default'} && defined $cmd{'Default'} ) {
+        $cmd{'Default'} = [];
+    } elsif ( ref $cmd{'Default'} ne 'ARRAY' ) {
+        $cmd{'Default'} = [ $cmd{'Default'} ];
+    }
+
     my ($add, $del);
-    if ( !$cmd{'Default'} ) {
+    unless ( @{ $cmd{'Default'} } ) {
         $add = \@new;
     } elsif ( !@new ) {
         $del = $cmd{'Default'};
@@ -426,12 +441,12 @@ sub _CompileAdditiveForUpdate {
         my (%cur, %new);
         $cur{$_} = 1 foreach @{ $cmd{'Default'} };
         $new{$_} = 1 foreach @new;
-        my %tmp;
+
         $add = [ grep !$cur{$_}, @new ];
         $del = [ grep !$new{$_}, @{ $cmd{'Default'} } ];
     }
     $_ ||= [] foreach ($add, $del);
-    return $add, $del;
+    return ($add, $del);
 }
 
 sub _SetAttribute {
@@ -455,28 +470,6 @@ sub _CanonicalizeCommand {
     $key =~ s/^(add|del|)c(?:ustom)?-?f(?:ield)?\.?[({\[](.*)[)}\]]$/$1customfield{$2}/i;
     return $key;
 }
-
-sub _SetWatcherAttribute {
-    my $ticket    = shift;
-    my $method    = shift;
-    my $attribute = shift;
-    my $type      = shift;
-    my $email     = shift;
-    my $results   = shift;
-    my ( $val, $msg ) = $ticket->DelWatcher(
-        Type  => $type,
-        Email => $email
-    );
-
-    $results->{$attribute} = {
-        value   => $email,
-        result  => $val,
-        message => $msg
-    };
-
-}
-
-
 
 sub _ReportResults {
     my %args = ( Ticket => undef, Message => undef, Results => {}, @_ );
