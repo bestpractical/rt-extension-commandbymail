@@ -87,7 +87,7 @@ END
 
 diag("set time on update") if $ENV{'TEST_VERBOSE'};
 foreach my $field ( qw(TimeWorked TimeEstimated TimeLeft) ) {
-    my $value = int rand 10;
+    my $value = 1 + int rand 10;
     my $text = <<END;
 Subject: [$RT::rtname #$test_ticket_id] test
 From: root\@localhost
@@ -102,6 +102,31 @@ END
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
     is($obj->$field(), $value, 'set time' );
+}
+
+
+diag("check time worked additivness") if $ENV{'TEST_VERBOSE'};
+{
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $test_ticket_id );
+    is($obj->id, $test_ticket_id, "loaded ticket");
+    my $current = $obj->TimeWorked;
+    ok($current, "time worked is greater than zero");
+
+    my $text = <<END;
+Subject: [$RT::rtname #$test_ticket_id] test
+From: root\@localhost
+
+TimeWorked: 10
+
+test
+END
+    my $id = create_ticket_via_gate( $text );
+    is($id, $test_ticket_id, "updated ticket");
+    $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    is($obj->TimeWorked, $current + 10, 'set time' );
 }
 
 

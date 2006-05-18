@@ -144,7 +144,7 @@ sub GetCurrentUser {
         $ticket_as_user->Load( $args{'Ticket'}->id );
 
         # we set status later as correspond can reopen ticket
-        foreach my $attribute (grep $_ ne 'Status', @REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES) {
+        foreach my $attribute (grep !/^(Status|TimeWorked)/, @REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES) {
             next unless defined $cmds{ lc $attribute };
             next if $ticket_as_user->$attribute() eq $cmds{ lc $attribute };
 
@@ -202,8 +202,15 @@ sub GetCurrentUser {
         }
 
         {
+            my $time_taken = 0;
+            $time_taken = $cmds{'timeworked'} || 0
+                if grep $_ eq 'TimeWorked', @TIME_ATTRIBUTES;
+
             my $method = ucfirst $args{'Action'};
-            my ($status, $msg) = $ticket_as_user->$method( MIMEObj => $args{'Message'} );
+            my ($status, $msg) = $ticket_as_user->$method(
+                TimeTaken => $time_taken,
+                MIMEObj   => $args{'Message'},
+            );
             unless ( $status ) {
                 $RT::Logger->warning(
                     "Couldn't write $args{'Action'}."
