@@ -1,0 +1,15 @@
+abstract: RT Extension-CommandByMail Extension
+author: Jesse Vincent <jesse@bestpractical.com>
+build_requires: 
+  Test::More: 0
+distribution_type: module
+generated_by: Module::Install version 0.62
+license: perl
+name: RT-Extension-CommandByMail
+no_index: 
+  directory: 
+    - inc
+    - t
+requires: 
+  UNIVERSAL::require: 0
+version: 0.001

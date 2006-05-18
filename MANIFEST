@@ -3,7 +3,23 @@ MANIFEST
 META.yml # Will be created by "make dist"
 Makefile.PL
 README
+INSTALL
 lib/RT/Extension/CommandByMail.pm
+lib/RT/Interface/Email/Filter/TakeAction.pm
 t/00.load.t
 t/pod-coverage.t
 t/pod.t
+inc/Module/Install.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/Metadata.pm
+inc/Module/Install/RTx.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
+patch/command_by_email-0.1-RT-3.4.2.patch
+patch/command_by_email-0.1-RT-3.4.3.patch
+patch/command_by_email-0.1-RT-3.4.4.patch
+patch/command_by_email-0.1-RT-3.4.5.patch
+
