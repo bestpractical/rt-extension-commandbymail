@@ -207,11 +207,11 @@ sub GetCurrentUser {
             my $link_mode = $ticket_as_user->LINKTYPEMAP->{ $type }->{'Mode'};
 
             $tmp{'Default'} = [ do {
-                my $links = $args{'Ticket'}->_Links( $link_mode, $link_type );
                 my %h = ( Base => 'Target', Target => 'Base' );
+                my $links = $args{'Ticket'}->_Links( $h{$link_mode}, $link_type );
                 my @res;
                 while ( my $link = $links->Next ) {
-                    my $method = $h{$link_mode} .'URI';
+                    my $method = $link_mode .'URI';
                     my $uri = $link->$method();
                     next unless $uri->IsLocal;
                     push @res, $uri->Object->Id;
@@ -480,9 +480,13 @@ sub _ReportResults {
         $msg .= $args{'Results'}->{'Create'}->{message};
     } else {
         foreach my $key ( keys %{ $args{'Results'} } ) {
-            next if $args{'Results'}->{$key}->{'result'};
-            $msg .= "Failed command ". $key .":". $args{'Results'}->{$key}->{'value'} ."\n";
-            $msg .= "Error message ". $args{'Results'}->{ $key }->{'message'} ."\n\n";
+            my @records = ref $args{'Results'}->{ $key } eq 'ARRAY'?
+                             @{$args{'Results'}->{ $key }}: $args{'Results'}->{ $key };
+            foreach my $rec ( @records ) {
+                next if $rec->{'result'};
+                $msg .= "Failed command ". $key .":". $rec->{'value'} ."\n";
+                $msg .= "Error message ". $rec->{'message'} ."\n\n";
+            }
         }
     }
     return unless $msg;
