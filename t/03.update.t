@@ -27,10 +27,10 @@ END
 }
 
 # XXX: use statuses from config/libs
-diag("set status on create") if $ENV{'TEST_VERBOSE'};
+diag("set status on update") if $ENV{'TEST_VERBOSE'};
 foreach my $status ( qw(new open stalled rejected) ) {
     my $text = <<END;
-Subject: test
+Subject: [$RT::rtname #$test_ticket_id] test
 From: root\@localhost
 
 Status: $status
@@ -38,7 +38,7 @@ Status: $status
 test
 END
     my $id = create_ticket_via_gate( $text );
-    ok($id, "created ticket");
+    is($id, $test_ticket_id, "updated ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
@@ -48,7 +48,7 @@ END
 diag("set priority and final_priority on create") if $ENV{'TEST_VERBOSE'};
 foreach my $priority ( 10, 20 ) { foreach my $final_priority ( 5, 15, 20 ) {
     my $text = <<END;
-Subject: test
+Subject: [$RT::rtname #$test_ticket_id] test
 From: root\@localhost
 
 Priority: $priority
@@ -57,7 +57,7 @@ FinalPriority: $final_priority
 test
 END
     my $id = create_ticket_via_gate( $text );
-    ok($id, "created ticket");
+    is($id, $test_ticket_id, "updated ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
@@ -65,12 +65,11 @@ END
     is($obj->FinalPriority, $final_priority, 'set final priority' );
 } }
 
-# XXX: these test are fail as 
-diag("set date on create") if $ENV{'TEST_VERBOSE'};
+diag("set date on update") if $ENV{'TEST_VERBOSE'};
 foreach my $date ( qw(Due Starts Started) ) {
     my $value = '2005-12-01 12:34:00';
     my $text = <<END;
-Subject: test
+Subject: [$RT::rtname #$test_ticket_id] test
 From: root\@localhost
 
 $date: $value
@@ -78,7 +77,7 @@ $date: $value
 test
 END
     my $id = create_ticket_via_gate( $text );
-    ok($id, "created ticket");
+    is($id, $test_ticket_id, "updated ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
@@ -86,11 +85,11 @@ END
     is($obj->$method->ISO, $value, 'set date' );
 }
 
-diag("set time on create") if $ENV{'TEST_VERBOSE'};
+diag("set time on update") if $ENV{'TEST_VERBOSE'};
 foreach my $field ( qw(TimeWorked TimeEstimated TimeLeft) ) {
     my $value = int rand 10;
     my $text = <<END;
-Subject: test
+Subject: [$RT::rtname #$test_ticket_id] test
 From: root\@localhost
 
 $field: $value
@@ -98,7 +97,7 @@ $field: $value
 test
 END
     my $id = create_ticket_via_gate( $text );
-    ok($id, "created ticket");
+    is($id, $test_ticket_id, "updated ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
@@ -106,11 +105,11 @@ END
 }
 
 
-diag("set watchers on create") if $ENV{'TEST_VERBOSE'};
+diag("set watchers on update") if $ENV{'TEST_VERBOSE'};
 foreach my $field ( qw(Requestor Cc AdminCc) ) {
     my $value = 'test@localhost';
     my $text = <<END;
-Subject: test
+Subject: [$RT::rtname #$test_ticket_id] test
 From: root\@localhost
 
 $field: $value
@@ -118,7 +117,7 @@ $field: $value
 test
 END
     my $id = create_ticket_via_gate( $text );
-    ok($id, "created ticket");
+    is($id, $test_ticket_id, "updated ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
@@ -126,29 +125,30 @@ END
     is($obj->$method(), $value, 'set '. $field );
 }
 
-diag("add requestor on create") if $ENV{'TEST_VERBOSE'};
+diag("add requestor on update") if $ENV{'TEST_VERBOSE'};
 {
     my $value = 'test@localhost';
     my $text = <<END;
-Subject: test
+Subject: [$RT::rtname #$test_ticket_id] test
 From: root\@localhost
 
+AddRequestor: root\@localhost
 AddRequestor: $value
 
 test
 END
     my $id = create_ticket_via_gate( $text );
-    ok($id, "created ticket");
+    is($id, $test_ticket_id, "updated ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
     is($obj->RequestorAddresses, "root\@localhost, $value", 'add requestor' );
 }
 
-diag("del requestor on create") if $ENV{'TEST_VERBOSE'};
+diag("del requestor on update") if $ENV{'TEST_VERBOSE'};
 {
     my $text = <<END;
-Subject: test
+Subject: [$RT::rtname #$test_ticket_id] test
 From: root\@localhost
 
 DelRequestor: root\@localhost
@@ -156,25 +156,43 @@ DelRequestor: root\@localhost
 test
 END
     my $id = create_ticket_via_gate( $text );
-    ok($id, "created ticket");
+    is($id, $test_ticket_id, "updated ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
-    is($obj->RequestorAddresses, '', 'del requestor' );
+    is($obj->RequestorAddresses, 'test@localhost', 'del requestor' );
 }
 
-diag("set links on create") if $ENV{'TEST_VERBOSE'};
-foreach my $field ( qw(DependsOn DependedOnBy RefersTo ReferredToBy Members MemberOf) ) {
+my $link_ticket_id;
+diag("create ticket for linking") if $ENV{'TEST_VERBOSE'};
+{
     my $text = <<END;
 Subject: test
 From: root\@localhost
-
-$field: $test_ticket_id
 
 test
 END
     my $id = create_ticket_via_gate( $text );
     ok($id, "created ticket");
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    $link_ticket_id = $id;
+}
+
+diag("set links on update") if $ENV{'TEST_VERBOSE'};
+foreach my $field ( qw(DependsOn DependedOnBy RefersTo ReferredToBy Members MemberOf) ) {
+    diag("test $field command") if $ENV{'TEST_VERBOSE'};
+    my $text = <<END;
+Subject: [$RT::rtname #$test_ticket_id] test
+From: root\@localhost
+
+$field: $link_ticket_id
+
+test
+END
+    my $id = create_ticket_via_gate( $text );
+    is($id, $test_ticket_id, "updated ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
@@ -190,10 +208,10 @@ END
     is($link->Type, $link_type, "correct type");
     isa_ok($link, 'RT::Link');
     my $method = $link_mode .'Obj';
-    is($link->$method()->Id, $test_ticket_id, 'set '. $field );
+    is($link->$method()->Id, $link_ticket_id, 'set '. $field );
 }
 
-diag("set custom fields on create") if $ENV{'TEST_VERBOSE'};
+diag("set custom fields on update") if $ENV{'TEST_VERBOSE'};
 {
     require RT::CustomField;
     my $cf = RT::CustomField->new( $RT::SystemUser );
@@ -202,7 +220,7 @@ diag("set custom fields on create") if $ENV{'TEST_VERBOSE'};
     ok($cf->id, "created global CF");
 
     my $text = <<END;
-Subject: test
+Subject: [$RT::rtname #$test_ticket_id] test
 From: root\@localhost
 
 CustomField.{$cf_name}: foo
@@ -210,7 +228,7 @@ CustomField.{$cf_name}: foo
 test
 END
     my $id = create_ticket_via_gate( $text );
-    ok($id, "created ticket");
+    is($id, $test_ticket_id, "updated ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
