@@ -5,9 +5,11 @@ RTx ('RT-Extension-CommandByMail');
 author ('Jesse Vincent <jesse@bestpractical.com>');
 license('perl');
 
+build_requires('Test::More');
+build_requires('IPC::Open2');
+
 # the patch for RT-3.4.5 has this requirement
 # RT may be require it too, but put it here to be sure 
 requires('UNIVERSAL::require');
-build_requires('Test::More');
 
 WriteAll();
