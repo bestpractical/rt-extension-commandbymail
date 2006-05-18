@@ -31,6 +31,8 @@ sub run_gate {
               ." --action $args{'action'}"
               ." 2>&1";
 
+    DBIx::SearchBuilder::Record::Cachable->FlushCache;
+
     my ($child_out, $child_in);
     my $pid = open2($child_out, $child_in, $cmd);
     print $child_in $args{'message'};
@@ -43,6 +45,9 @@ sub create_ticket_via_gate {
     my $message = shift;
     my $gate_result = run_gate( message => $message );
     $gate_result =~ /Ticket: (\d+)/;
+    unless ( $1 ) {
+        print STDERR "Couldn't find ticket id in text:\n$gate_result";
+    }
     return $1;
 }
 
