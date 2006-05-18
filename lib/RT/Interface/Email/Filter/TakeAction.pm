@@ -5,8 +5,8 @@ use strict;
 
 use RT::Interface::Email;
 
-our @REGULAR_ATTRIBUTES = qw(Queue Status Priority FinalPriority
-                             TimeWorked TimeLeft TimeEstimated Subject );
+our @REGULAR_ATTRIBUTES = qw(Queue Subject Status Priority FinalPriority);
+our @TIME_ATTRIBUTES    = qw(TimeWorked TimeLeft TimeEstimated);
 our @DATE_ATTRIBUTES    = qw(Due Starts Started Resolved Told);
 our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
             HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
@@ -143,9 +143,10 @@ sub GetCurrentUser {
     if ( $args{'Ticket'}->id ) {
         $ticket_as_user->Load( $args{'Ticket'}->id );
 
-        foreach my $attribute (@REGULAR_ATTRIBUTES) {
-            next unless ( defined $cmds{ lc $attribute }
-                and ( $ticket_as_user->$attribute() ne $cmds{ lc $attribute } ) );
+        # we set status later as correspond can reopen ticket
+        foreach my $attribute (grep $_ ne 'Status', @REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES) {
+            next unless defined $cmds{ lc $attribute };
+            next if $ticket_as_user->$attribute() eq $cmds{ lc $attribute };
 
             _SetAttribute(
                 $ticket_as_user,        $attribute,
@@ -155,10 +156,11 @@ sub GetCurrentUser {
 
         foreach my $attribute (@DATE_ATTRIBUTES) {
             next unless ( $cmds{ lc $attribute } );
+
             my $date = RT::Date->new( $args{'CurrentUser'} );
             $date->Set(
                 Format => 'unknown',
-                Value  => $cmds{ lc $attribute }
+                Value  => $cmds{ lc $attribute },
             );
             _SetAttribute( $ticket_as_user, $attribute, $date->ISO,
                 \%results );
@@ -196,6 +198,17 @@ sub GetCurrentUser {
                     result  => $val,
                     message => $msg
                 };
+            }
+        }
+
+        {
+            my $method = ucfirst $args{'Action'};
+            my ($status, $msg) = $ticket_as_user->$method( MIMEObj => $args{'Message'} );
+            unless ( $status ) {
+                $RT::Logger->warning(
+                    "Couldn't write $args{'Action'}."
+                    ." Fallback to standard mailgate. Error: $msg");
+                return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
             }
         }
 
@@ -281,17 +294,27 @@ sub GetCurrentUser {
             }
         }
 
+        foreach my $attribute (grep $_ eq 'Status', @REGULAR_ATTRIBUTES) {
+            next unless defined $cmds{ lc $attribute };
+            next if $ticket_as_user->$attribute() eq $cmds{ lc $attribute };
+
+            _SetAttribute(
+                $ticket_as_user,        $attribute,
+                $cmds{ lc $attribute }, \%results
+            );
+        }
+
         _ReportResults(
             Ticket => $args{'Ticket'},
             Results => \%results,
             Message => $args{'Message'}
         );
-        return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
+        return ( $args{'CurrentUser'}, -2 );
 
     } else {
 
         my %create_args = ();
-        foreach my $attr (@REGULAR_ATTRIBUTES) {
+        foreach my $attr (@REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES) {
             next unless exists $cmds{ lc $attr };
             $create_args{$attr} = $cmds{ lc $attr };
         }
