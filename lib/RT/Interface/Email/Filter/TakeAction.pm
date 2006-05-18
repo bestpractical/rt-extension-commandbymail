@@ -26,11 +26,14 @@ Owner: <username> Set new owner using the given username
 Priority: <#> Set new priority to the given value (1-99)
 FinalPriority: <#> Set new final priority to the given value (1-99)
 
-=head3 Dates and time
+=head3 Dates
 
 Due: <new timestamp> Set new due date/timestamp, or 0 to disable.
 Starts: <new timestamp>
 Started: <new timestamp>
+
+=head3 Time
+
 TimeWorked: <minutes> Replace the tickets 'timeworked' value.
 TimeEstimated: <minutes>
 TimeLeft: <minutes>
@@ -49,13 +52,11 @@ TimeLeft: <minutes>
 
 =head3 Links
 
-+DependsOn:
-+AddDependsOn:
-+DelDependsOn
++DependsOn: <#> Set link(s) using ticket id
 +DependedOnBy:
 +RefersTo:
 +ReferredToBy:
-+HasMember:
++Members:
 +MemberOf:
 
 =head3 Custom field values
@@ -323,7 +324,7 @@ sub GetCurrentUser {
         # First of all fetch default values
         foreach my $type ( qw(Requestor Cc AdminCc) ) {
             my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
-            $tmp{'Default'} = [ $args{'CurrentUser'}->id ] if $type eq 'Requestor';
+            $tmp{'Default'} = [ $args{'CurrentUser'}->EmailAddress ] if $type eq 'Requestor';
             $tmp{'Default'} = [
                 ParseCcAddressesFromHead(
                     Head        => $args{'Message'}->head,
