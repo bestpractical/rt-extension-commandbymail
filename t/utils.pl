@@ -16,10 +16,11 @@ use IPC::Open2;
 
 ### after: our $mailgate = '@RT_BIN_PATH@/rt-mailgate';
 our $mailgate = '/opt/rt3/bin/rt-mailgate';
+die "Couldn't find mailgate ($mailgate) command" unless -f $mailgate;
+
 $mailgate .= ' --debug';
 $mailgate .= ' --url '. $RT::WebURL;
 
-die "Couldn't find mailgate ($mailgate) command" unless -f $mailgate;
 
 sub run_gate {
     my %args = (
