@@ -11,62 +11,120 @@ our @DATE_ATTRIBUTES    = qw(Due Starts Started Resolved Told);
 our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
             HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
 
-=head2 COMMANDS
+=head1 NAME
 
-This mail action supports several commands to manipulate tickets'
-metadata from emails.
+RT::Interface::Email::Filter::TakeAction - Change metadata of ticket via email
+
+=head1 DESCRIPTION
+
+This extension parse content of incomming messages for list commands. Format
+of commands is:
+
+    Command: value
+    Command: value
+    ...
+
+You can find list of L</COMMANDS commands below>.
+
+Some commands (like Status, Queue and other) can be used only once. Commands
+that manage lists can be used multiple times, for example link, custom fields
+and watchers commands. Also, the latter can be used with C<Add> and C<Del>
+prefixes to add/delete values from the current list of the ticket you reply to
+or comment on.
+
+=head2 COMMANDS
 
 =head3 Basic
 
-Queue: <name> Set new queue for the ticket
-Subject: <string> Set new subject to the given string
-Status: <status> Set new status, one of new, open, stalled,
-resolved, rejected or deleted
-Owner: <username> Set new owner using the given username
-Priority: <#> Set new priority to the given value (1-99)
-FinalPriority: <#> Set new final priority to the given value (1-99)
+=over 4
+
+=item Queue: <name>
+
+Set new queue for the ticket
+
+=item Subject: <string>
+
+Set new subject to the given string
+
+=item Status: <status>
+
+Set new status, one of new, open, stalled, resolved, rejected or deleted
+
+=item Owner: <username>
+
+Set new owner using the given username
+
+=item Priority: <#>
+
+Set new priority to the given value
+
+=item FinalPriority: <#>
+
+Set new final priority to the given value
+
+=back
 
 =head3 Dates
 
-Due: <new timestamp> Set new due date/timestamp, or 0 to disable.
-Starts: <new timestamp>
-Started: <new timestamp>
+Set new date/timestamp, or 0 to unset:
+
+    Due: <new timestamp>
+    Starts: <new timestamp>
+    Started: <new timestamp>
 
 =head3 Time
 
-TimeWorked: <minutes> Replace the tickets 'timeworked' value.
-TimeEstimated: <minutes>
-TimeLeft: <minutes>
+Set new times to the given value in minutes. Note that
+on correspond/comment B<< C<TimeWorked> add time >> to the current
+value.
+
+    TimeWorked: <minutes>
+    TimeEstimated: <minutes>
+    TimeLeft: <minutes>
 
 =head3 Watchers
 
-+Requestor: <address> Set requestor(s) using the email address
-+AddRequestor: <address> Add new requestor using the email address
-+DelRequestor: <address> Remove email address as requestor
-+Cc: <address> Set Cc watcher(s) using the email address
-+AddCc: <address> Add new Cc watcher using the email address
-+DelCc: <address> Remove email address as Cc watcher
-+AdminCc: <address> Set AdminCc watcher(s) using the email address
-+AddAdminCc: <address> Add new AdminCc watcher using the email address
-+DelAdminCc: <address> Remove email address as AdminCc watcher
+Manage watchers: requestors, ccs and admin ccs. This commands
+can be used several times and/or with C<Add> and C<Del> prefixes,
+for example C<Requestor> comand set requestor(s) and the current
+requestors would be deleted, but C<AddRequestor> command adds
+to the current list.
+
+    Requestor: <address> Set requestor(s) using the email address
+    AddRequestor: <address> Add new requestor using the email address
+    DelRequestor: <address> Remove email address as requestor
+    Cc: <address> Set Cc watcher(s) using the email address
+    AddCc: <address> Add new Cc watcher using the email address
+    DelCc: <address> Remove email address as Cc watcher
+    AdminCc: <address> Set AdminCc watcher(s) using the email address
+    AddAdminCc: <address> Add new AdminCc watcher using the email address
+    DelAdminCc: <address> Remove email address as AdminCc watcher
 
 =head3 Links
 
-+DependsOn: <#> Set link(s) using ticket id
-+DependedOnBy:
-+RefersTo:
-+ReferredToBy:
-+Members:
-+MemberOf:
+Manage links. These commands are also could be used several times in one
+message.
+
+    DependsOn: <ticket id>
+    DependedOnBy: <ticket id>
+    RefersTo: <ticket id>
+    ReferredToBy: <ticket id>
+    Members: <ticket id>
+    MemberOf: <ticket id>
 
 =head3 Custom field values
 
-+CustomField.{C<CFName>}:
-+AddCustomField.{C<CFName>}:
-+DelCustomField.{C<CFName>}:
-+CF.{C<CFName>}:
-+AddCF.{C<CFName>}:
-+DelCF.{C<CFName>}:
+Manage custom field values. Could be used multiple times.
+
+    CustomField.{C<CFName>}: <custom field value>
+    AddCustomField.{C<CFName>}: <custom field value>
+    DelCustomField.{C<CFName>}: <custom field value>
+
+Short forms:
+
+    CF.{C<CFName>}: <custom field value>
+    AddCF.{C<CFName>}: <custom field value>
+    DelCF.{C<CFName>}: <custom field value>
 
 =cut
 
