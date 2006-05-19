@@ -24,5 +24,10 @@ Add 'Filter::TakeAction' to the list of mail plugins in the RT config. Restart w
 Note that extension should be pushed into list after Auth::MailFrom or similar plugin that
 loads current user object.
 
+You can do this by adding the following line to your RT::SiteConfig:
+
+@MailPlugins = qw(Auth::MailFrom Filter::TakeAction);
+
+
 Enjoy.
 
