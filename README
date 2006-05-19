@@ -11,3 +11,95 @@ Copyright (C) 2006, Best Practical Solutions LLC.
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
+DESCRIPTION
+    This extension parse content of incomming messages for list commands.
+    Format of commands is:
+
+        Command: value
+        Command: value
+        ...
+
+    You can find list of "COMMANDS commands below".
+
+    Some commands (like Status, Queue and other) can be used only once.
+    Commands that manage lists can be used multiple times, for example link,
+    custom fields and watchers commands. Also, the latter can be used with
+    "Add" and "Del" prefixes to add/delete values from the current list of
+    the ticket you reply to or comment on.
+
+  COMMANDS
+   Basic
+    Queue: <name>
+        Set new queue for the ticket
+
+    Subject: <string>
+        Set new subject to the given string
+
+    Status: <status>
+        Set new status, one of new, open, stalled, resolved, rejected or
+        deleted
+
+    Owner: <username>
+        Set new owner using the given username
+
+    Priority: <#>
+        Set new priority to the given value
+
+    FinalPriority: <#>
+        Set new final priority to the given value
+
+   Dates
+    Set new date/timestamp, or 0 to unset:
+
+        Due: <new timestamp>
+        Starts: <new timestamp>
+        Started: <new timestamp>
+
+   Time
+    Set new times to the given value in minutes. Note that on
+    correspond/comment "TimeWorked" add time to the current value.
+
+        TimeWorked: <minutes>
+        TimeEstimated: <minutes>
+        TimeLeft: <minutes>
+
+   Watchers
+    Manage watchers: requestors, ccs and admin ccs. This commands can be
+    used several times and/or with "Add" and "Del" prefixes, for example
+    "Requestor" comand set requestor(s) and the current requestors would be
+    deleted, but "AddRequestor" command adds to the current list.
+
+        Requestor: <address> Set requestor(s) using the email address
+        AddRequestor: <address> Add new requestor using the email address
+        DelRequestor: <address> Remove email address as requestor
+        Cc: <address> Set Cc watcher(s) using the email address
+        AddCc: <address> Add new Cc watcher using the email address
+        DelCc: <address> Remove email address as Cc watcher
+        AdminCc: <address> Set AdminCc watcher(s) using the email address
+        AddAdminCc: <address> Add new AdminCc watcher using the email address
+        DelAdminCc: <address> Remove email address as AdminCc watcher
+
+   Links
+    Manage links. These commands are also could be used several times in one
+    message.
+
+        DependsOn: <ticket id>
+        DependedOnBy: <ticket id>
+        RefersTo: <ticket id>
+        ReferredToBy: <ticket id>
+        Members: <ticket id>
+        MemberOf: <ticket id>
+
+   Custom field values
+    Manage custom field values. Could be used multiple times.
+
+        CustomField.{C<CFName>}: <custom field value>
+        AddCustomField.{C<CFName>}: <custom field value>
+        DelCustomField.{C<CFName>}: <custom field value>
+
+    Short forms:
+
+        CF.{C<CFName>}: <custom field value>
+        AddCF.{C<CFName>}: <custom field value>
+        DelCF.{C<CFName>}: <custom field value>
+
