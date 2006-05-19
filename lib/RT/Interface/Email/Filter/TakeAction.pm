@@ -158,10 +158,11 @@ sub GetCurrentUser {
     my @content;
     my @parts = $args{'Message'}->parts_DFS;
     foreach my $part (@parts) {
+        my $body = $part->bodyhandle or next;
 
         #if it looks like it has pseudoheaders, that's our content
-        if ( $part->stringify_body =~ /^(?:\S+):/m ) {
-            @content = $part->bodyhandle->as_lines();
+        if ( $body->as_string =~ /^(?:\S+):/m ) {
+            @content = $body->as_lines;
             last;
         }
     }
