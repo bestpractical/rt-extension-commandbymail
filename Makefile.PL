@@ -11,6 +11,8 @@ build_requires('IPC::Open2');
 # the patch for RT-3.4.5 has this requirement
 # RT may be require it too, but put it here to be sure 
 requires('UNIVERSAL::require');
+requires('MIME::Entity' => '5.420');
+auto_install();
 
 my ($lp) = ($INC{'RT.pm'} =~ /^(.*)[\\\/]/);
 my $lib_path = join( ' ', "$RT::LocalPath/lib", $lp );
