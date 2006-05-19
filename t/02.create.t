@@ -67,13 +67,16 @@ END
 
 # XXX: these test are fail as 
 diag("set date on create") if $ENV{'TEST_VERBOSE'};
-foreach my $date ( qw(Due Starts Started) ) {
+foreach my $field ( qw(Due Starts Started) ) {
     my $value = '2005-12-01 12:34:00';
+    my $date_obj = RT::Date->new( $RT::System );
+    $date_obj->Set( Format => 'unknown', Value => $value );
+
     my $text = <<END;
 Subject: test
 From: root\@localhost
 
-$date: $value
+$field: $value
 
 test
 END
@@ -82,8 +85,8 @@ END
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
-    my $method = $date .'Obj';
-    is($obj->$method->ISO, $value, 'set date' );
+    my $method = $field .'Obj';
+    is($obj->$method->ISO, $date_obj->ISO, 'set date' );
 }
 
 diag("set time on create") if $ENV{'TEST_VERBOSE'};
