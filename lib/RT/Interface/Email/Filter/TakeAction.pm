@@ -5,7 +5,7 @@ use strict;
 
 use RT::Interface::Email;
 
-our @REGULAR_ATTRIBUTES = qw(Queue Subject Status Priority FinalPriority);
+our @REGULAR_ATTRIBUTES = qw(Queue Owner Subject Status Priority FinalPriority);
 our @TIME_ATTRIBUTES    = qw(TimeWorked TimeLeft TimeEstimated);
 our @DATE_ATTRIBUTES    = qw(Due Starts Started Resolved Told);
 our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
