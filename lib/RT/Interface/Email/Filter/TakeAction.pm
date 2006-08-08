@@ -10,6 +10,7 @@ our @TIME_ATTRIBUTES    = qw(TimeWorked TimeLeft TimeEstimated);
 our @DATE_ATTRIBUTES    = qw(Due Starts Started Resolved Told);
 our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
             HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
+our @WATCHER_ATTRIBUTES = qw(Requestor Cc AdminCc);
 
 =head1 NAME
 
@@ -188,6 +189,17 @@ sub GetCurrentUser {
 
     my %results;
 
+    foreach my $cmd ( keys %cmds ) {
+        my ($val, $msg) = _CheckCommand( $cmd );
+        unless ( $val ) {
+            $results{ $cmd } = {
+                value   => delete $cmds{ $cmd },
+                result  => $val,
+                message => $msg,
+            };
+        }
+    }
+
     my $ticket_as_user = RT::Ticket->new( $args{'CurrentUser'} );
     my $queue          = RT::Queue->new( $args{'CurrentUser'} );
     if ( $cmds{'queue'} ) {
@@ -226,7 +238,7 @@ sub GetCurrentUser {
             $results{ lc $attribute }->{value} = $cmds{ lc $attribute };
         }
 
-        foreach my $type ( qw(Requestor Cc AdminCc) ) {
+        foreach my $type ( @WATCHER_ATTRIBUTES ) {
             my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
             next unless keys %tmp;
 
@@ -411,7 +423,7 @@ sub GetCurrentUser {
 
         # Canonicalize watchers
         # First of all fetch default values
-        foreach my $type ( qw(Requestor Cc AdminCc) ) {
+        foreach my $type ( @WATCHER_ATTRIBUTES ) {
             my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
             $tmp{'Default'} = [ $args{'CurrentUser'}->EmailAddress ] if $type eq 'Requestor';
             $tmp{'Default'} = [
@@ -454,6 +466,8 @@ sub GetCurrentUser {
 
             return ($args{'CurrentUser'}, $args{'AuthLevel'});
         }
+
+        _ReportResults( Results => \%results, Message => $args{'Message'} );
 
         # now that we've created a ticket, we abort so we don't create another.
         $args{'Ticket'}->Load( $id );
@@ -551,7 +565,6 @@ sub _SetAttribute {
         result  => $val,
         message => $msg
     };
-
 }
 
 sub _CanonicalizeCommand {
@@ -561,24 +574,45 @@ sub _CanonicalizeCommand {
     return $key;
 }
 
+sub _CheckCommand {
+    my ($cmd, $val) = (lc shift, shift);
+    return 1 if $cmd =~ /^(add|del|)customfield{.*}$/i;
+    if ( grep $cmd eq lc $_, @REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES, @DATE_ATTRIBUTES ) {
+        return 1 unless ref $val;
+        return (0, "Command '$cmd' doesn't support multiple values");
+    }
+    return 1 if grep $cmd eq lc $_, @LINK_ATTRIBUTES, @WATCHER_ATTRIBUTES;
+    if ( $cmd =~ /^(?:add|del)(.*)$/i ) {
+        my $cmd = $1;
+        if ( grep $cmd eq lc $_, @REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES, @DATE_ATTRIBUTES ) {
+            return (0, "Command '$cmd' doesn't support multiple values");
+        }
+        return 1 if grep $cmd eq lc $_, @LINK_ATTRIBUTES, @WATCHER_ATTRIBUTES;
+    }
+
+    return (0, "Command '$cmd' is unkown");
+}
+
 sub _ReportResults {
     my %args = ( Ticket => undef, Message => undef, Results => {}, @_ );
 
     my $msg = '';
     unless ( $args{'Ticket'} ) {
-        $msg .= $args{'Results'}->{'Create'}->{message};
-    } else {
-        foreach my $key ( keys %{ $args{'Results'} } ) {
-            my @records = ref $args{'Results'}->{ $key } eq 'ARRAY'?
-                             @{$args{'Results'}->{ $key }}: $args{'Results'}->{ $key };
-            foreach my $rec ( @records ) {
-                next if $rec->{'result'};
-                $msg .= "Failed command ". $key .":". $rec->{'value'} ."\n";
-                $msg .= "Error message ". $rec->{'message'} ."\n\n";
-            }
+        $msg .= $args{'Results'}{'Create'}{'message'} || '';
+        $msg .= "\n" if $msg;
+        delete $args{'Results'}{'Create'};
+    }
+
+    foreach my $key ( keys %{ $args{'Results'} } ) {
+        my @records = ref $args{'Results'}->{ $key } eq 'ARRAY'?
+                         @{$args{'Results'}->{ $key }}: $args{'Results'}->{ $key };
+        foreach my $rec ( @records ) {
+            next if $rec->{'result'};
+            $msg .= "Failed command '". $key .": ". $rec->{'value'} ."'\n";
+            $msg .= "Error message: ". ($rec->{'message'}||"(no message)") ."\n\n";
         }
     }
-    return unless $msg;
+    return unless $msg && $msg !~ /^\s*$/;
 
     $RT::Logger->warning( $msg );
     my $ErrorsTo = RT::Interface::Email::ParseErrorsToAddressFromHead( $args{'Message'}->head );
