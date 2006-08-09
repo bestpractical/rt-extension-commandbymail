@@ -16,14 +16,15 @@ INSTALL
 lib/RT/Extension/CommandByMail.pm
 lib/RT/Interface/Email/Filter/TakeAction.pm
 Makefile.PL
-MANIFEST
-META.yml			# Will be created by "make dist"
+MANIFEST			This list of files
+META.yml
 patch/command_by_email-0.1-RT-3.4.2.patch
 patch/command_by_email-0.1-RT-3.4.3.patch
 patch/command_by_email-0.1-RT-3.4.4.patch
 patch/command_by_email-0.1-RT-3.4.5.patch
 patch/command_by_email-0.1-RT-3.6.0.patch
 README
+SIGNATURE
 t/00.load.t
 t/01.internals.t
 t/02.create.t

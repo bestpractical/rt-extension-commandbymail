@@ -1,0 +1,56 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.54.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 1364f9cea9fe446281f9bf32089c8370569fa072 Changes
+SHA1 93b7267c67cf942aa0b2451af4518095c7bda806 INSTALL
+SHA1 3f81557f86b73ea066ea8bddcc3c8110d745b539 MANIFEST
+SHA1 2a4830a6fd4ce7a59da17f0385c1c958b7522b36 META.yml
+SHA1 a11133e06ca757a45bccd9b48a8e861ed272bd7e Makefile.PL
+SHA1 e4cff7aab32876ff4d38b61d9ca50e7562c49caa README
+SHA1 e974f78178f53c88fb7e3f8d20f7df184d13e1d0 inc/Module/AutoInstall.pm
+SHA1 017bedfcba1e0c72b36301e6ef21b8712b84d175 inc/Module/Install.pm
+SHA1 bcfb15c6a158831c45b5100a7aa94e0f88fced9f inc/Module/Install/AutoInstall.pm
+SHA1 b1a70869c098ba602151631386fc510b5bfd3511 inc/Module/Install/Base.pm
+SHA1 dd7313db23119d49ae78593bfa576554fb5b0fd8 inc/Module/Install/Can.pm
+SHA1 7c3a5153a5574556d895f23e121a41e680da11c1 inc/Module/Install/Fetch.pm
+SHA1 2e9c012e58c778a4a83c5eaea20c3aed306ad0c5 inc/Module/Install/Include.pm
+SHA1 176d68fe7c07b6ab7cfe09093078b8127bbde786 inc/Module/Install/Makefile.pm
+SHA1 8b37b38215d14f922b3d5132ce33d11d21d531ba inc/Module/Install/Metadata.pm
+SHA1 9270a0d5bbc00f10b6a0917a8b7ef82d75f68122 inc/Module/Install/RTx.pm
+SHA1 025199c746ca7620c19d439ca920edafce8bf36b inc/Module/Install/Substitute.pm
+SHA1 7eb44b00058c44795038d7fa4c0c77470f20a7f8 inc/Module/Install/Win32.pm
+SHA1 6d05967a5e1680b5f118315aaa6b8a1e143d79d8 inc/Module/Install/WriteAll.pm
+SHA1 53141bb7db9ccc493dcf0786ccc6521973e749ca lib/RT/Extension/CommandByMail.pm
+SHA1 93a18874d3a76a940410babb0c3e60f0cd9c11f9 lib/RT/Interface/Email/Filter/TakeAction.pm
+SHA1 cf2c3c834f624767534204ed9e08a8f27d976fff patch/command_by_email-0.1-RT-3.4.2.patch
+SHA1 7b0a3b9f38d5214c10030d9d840a94e7511500f3 patch/command_by_email-0.1-RT-3.4.3.patch
+SHA1 7b0a3b9f38d5214c10030d9d840a94e7511500f3 patch/command_by_email-0.1-RT-3.4.4.patch
+SHA1 4d86236d1f46c9ef07b047d54e7782d0199349db patch/command_by_email-0.1-RT-3.4.5.patch
+SHA1 698501dd38dfed7330b62eb4f5e39c51ca434330 patch/command_by_email-0.1-RT-3.6.0.patch
+SHA1 b07311fa2bf832eca96c0c0676fbac731c8b9cca t/00.load.t
+SHA1 f103399f7e6db787912dfc7529dca0030be9e131 t/01.internals.t
+SHA1 11e8429f40d3d6d3c02a6ec64682ef6d91438f27 t/02.create.t
+SHA1 c62be30942713d88df50265168f0cf1ec65862b8 t/03.update.t
+SHA1 6da39b48ce64b584e4c3274bff96fc76ff484820 t/pod-coverage.t
+SHA1 0190346d7072d458c8a10a45c19f86db641dcc48 t/pod.t
+SHA1 297292480c5eff44ffa62a72573e031cf146bfbf t/utils.pl
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.3 (Darwin)
+
+iD8DBQFE2VlwEi9d9xCOQEYRArO5AJ42iQ7pJgJdMg3s5mpFXbrCryFXQACgi1GZ
+xfp2zgZqMpvxDlP+Y0HZS48=
+=sRjx
+-----END PGP SIGNATURE-----
