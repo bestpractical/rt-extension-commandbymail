@@ -1,5 +1,10 @@
 Revision history for RT-Extension-CommandByMail
 
-0.0.1  Mon May  8 13:42:24 2006
-       Initial release.
+0.02
+* patch for RT-3.6.0
+* fix setting Owner
+* report back to the sender if command doesn't exist
+
+0.01 Mon May  8 13:42:24 2006
+* Initial release.
 
