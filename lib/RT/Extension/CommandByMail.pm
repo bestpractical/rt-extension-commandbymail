@@ -36,11 +36,14 @@ that applies to the RT in general also applies to the extension.
 Read L<INSTALL>. Note that you B<must patch> RT
 to use this extension, so read the file.
 
+=head1 CAVEATS
+
+This extension is incomatible with C<UnsafeEmailCommands> RT option.
+
 =head1 AUTHOR
 
 Jesse Vincent  C<< <jesse@bestpractical.com> >>
 Ruslan U. Zakirov  C<< <ruz@bestpractical.com> >>
-
 
 =head1 LICENCE AND COPYRIGHT
 
