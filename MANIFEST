@@ -1,18 +1,4 @@
 Changes
-MANIFEST
-META.yml # Will be created by "make dist"
-Makefile.PL
-README
-INSTALL
-lib/RT/Extension/CommandByMail.pm
-lib/RT/Interface/Email/Filter/TakeAction.pm
-t/00.load.t
-t/01.internals.t
-t/02.create.t
-t/03.update.t
-t/pod-coverage.t
-t/pod.t
-t/utils.pl
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
@@ -26,8 +12,22 @@ inc/Module/Install/RTx.pm
 inc/Module/Install/Substitute.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
+INSTALL
+lib/RT/Extension/CommandByMail.pm
+lib/RT/Interface/Email/Filter/TakeAction.pm
+Makefile.PL
+MANIFEST
+META.yml			# Will be created by "make dist"
 patch/command_by_email-0.1-RT-3.4.2.patch
 patch/command_by_email-0.1-RT-3.4.3.patch
 patch/command_by_email-0.1-RT-3.4.4.patch
 patch/command_by_email-0.1-RT-3.4.5.patch
-
+patch/command_by_email-0.1-RT-3.6.0.patch
+README
+t/00.load.t
+t/01.internals.t
+t/02.create.t
+t/03.update.t
+t/pod-coverage.t
+t/pod.t
+t/utils.pl
