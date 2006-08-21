@@ -129,6 +129,12 @@ Short forms:
 
 =cut
 
+=head2 GetCurrentUser
+
+Returns a CurrentUser object.  Also performs all the commands.
+
+=cut
+
 sub GetCurrentUser {
     my %args = (
         Message       => undef,
