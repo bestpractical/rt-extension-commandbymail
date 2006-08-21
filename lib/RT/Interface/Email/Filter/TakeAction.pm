@@ -596,7 +596,7 @@ sub _CheckCommand {
         return 1 if grep $cmd eq lc $_, @LINK_ATTRIBUTES, @WATCHER_ATTRIBUTES;
     }
 
-    return (0, "Command '$cmd' is unkown");
+    return (0, "Command '$cmd' is unknown");
 }
 
 sub _ReportResults {
