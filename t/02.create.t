@@ -220,3 +220,71 @@ END
     is($obj->FirstCustomFieldValue($cf_name), 'foo', 'correct cf value' );
 }
 
+diag("accept watcher as username and email address") if $ENV{'TEST_VERBOSE'};
+{
+    require RT::Queue;
+    require RT::User;
+
+    my $queue_name = "WatcherQueue$$";
+    my $queue = RT::Queue->new($RT::SystemUser);
+    my ($id, $msg) = $queue->Create( Name => $queue_name );
+    ok($id, "Created queue '$queue_name'? $msg");
+
+    my $user_name = "WatcherCommandTest$$";
+    my $user_email = "watchercommand$$\@example.com";
+
+    my $user = RT::User->new($RT::SystemUser);
+    ($id, $msg) = $user->Create( Name => $user_name, 
+                                     EmailAddress => $user_email );
+    ok($id, "Created '$user_name'? $msg");
+    ($id, $msg) = $user->SetPrivileged(1);
+    ($id, $msg) = $user->PrincipalObj->GrantRight( Right => 'OwnTicket',
+        Object => $queue );
+    ok($id, "Granted 'OwnTicket' to '$user_name'? $msg");
+    ($id, $msg) = $user->PrincipalObj->GrantRight( Right => 'Watch',
+        Object => $queue );
+    ok($id, "Granted 'Watch' to '$user_name'? $msg");
+
+    foreach my $owner ( $user_name, $user_email ) {
+        my $text = <<END;
+Subject: owner test $$
+From: root\@localhost
+
+Queue: $queue_name
+Owner: $owner
+
+owner test
+END
+        $id = create_ticket_via_gate( $text );
+        ok($id, "created ticket");
+        my $ticket = RT::Ticket->new($RT::SystemUser);
+        $ticket->Load( $id );
+        is($ticket->id, $id, "loaded ticket");
+        ok( $ticket->IsWatcher( Type => 'Owner', 
+            PrincipalId => $user->PrincipalId ), "set '$owner' as Owner"
+        );
+    }
+
+    foreach my $cc ( $user_name, $user_email ) {
+        my $text = <<END;
+Subject: cc test $$
+From: root\@localhost
+
+Queue: $queue_name
+Cc: $cc
+
+cc test
+END
+        $id = create_ticket_via_gate( $text );
+        ok($id, "created ticket");
+        my $ticket = RT::Ticket->new($RT::SystemUser);
+        $ticket->Load( $id );
+        is($ticket->id, $id, "loaded");
+        ok( $ticket->IsWatcher( Type => 'Cc',
+            PrincipalId => $user->PrincipalId ), "set '$cc' as Cc" 
+        );
+    }
+
+}
+
+1;
