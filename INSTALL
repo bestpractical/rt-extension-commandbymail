@@ -14,15 +14,24 @@ Apply patch with following commands:
     cd /opt/rt3
     patch -p0 <path/to/patch/command_by_mail-<patch version>-RT-<rt version>.patch
 
-You MUST apply patch in order to use this extension. Use patch with greatest <patch version>,
-old patches would be shipped with distribution to help you revert old patch(es) and apply new
-one on upgrades.
+If you are using RT 3.6.0 or earlier, you MUST apply a patch in order to use 
+this extension. Use the patch with the greatest <patch version> -- old patches 
+are shipped with the distribution so you can revert old patch(es) and apply the 
+new one on upgrades.
+
+If you are using RT 3.6.1 or later, you no longer need to apply a patch.
 
 CONFIGURE
 
-Add 'Filter::TakeAction' to the list of mail plugins in the RT config. Restart web server.
-Note that extension should be pushed into list after Auth::MailFrom or similar plugin that
-loads current user object.
+Add 'Filter::TakeAction' to the list of mail plugins in the RT config.  (You'll
+need to add Auth::MailFrom to the list as well if you want to run the test 
+suite.  Auth::MailFrom is distributed with RT as 
+RT::Interface::Email::Auth::MailFrom.)
+
+Restart web server.
+
+Note that Filter::TakeAction should be pushed into list *after* Auth::MailFrom 
+or any similar plugin that loads a current user object.
 
 You can do this by adding the following line to your RT::SiteConfig:
 
