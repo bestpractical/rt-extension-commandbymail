@@ -115,7 +115,8 @@ message.
 
 =head3 Custom field values
 
-Manage custom field values. Could be used multiple times.
+Manage custom field values. Could be used multiple times.  (The curly braces
+are literal.)
 
     CustomField.{<CFName>}: <custom field value>
     AddCustomField.{<CFName>}: <custom field value>
