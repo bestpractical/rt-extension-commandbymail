@@ -23,6 +23,7 @@ patch/command_by_email-0.1-RT-3.4.3.patch
 patch/command_by_email-0.1-RT-3.4.4.patch
 patch/command_by_email-0.1-RT-3.4.5.patch
 patch/command_by_email-0.1-RT-3.6.0.patch
+patch/errors_in_reply_to-RT-3.6.1.patch
 README
 SIGNATURE
 t/00.load.t
