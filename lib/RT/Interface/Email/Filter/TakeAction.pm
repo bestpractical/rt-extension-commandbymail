@@ -226,6 +226,13 @@ sub GetCurrentUser {
             next unless defined $cmds{ lc $attribute };
             next if $ticket_as_user->$attribute() eq $cmds{ lc $attribute };
 
+            # canonicalize owner -- accept an e-mail address
+            if ( $attribute eq 'Owner' && $cmds{ lc $attribute } =~ /\@/ ) {
+                my $user = RT::User->new($RT::SystemUser);
+                $user->LoadByEmail( $cmds{ lc $attribute } );
+                $cmds{ lc $attribute } = $user->Name if $user->id;
+            }
+
             _SetAttribute(
                 $ticket_as_user,        $attribute,
                 $cmds{ lc $attribute }, \%results
@@ -405,9 +412,17 @@ sub GetCurrentUser {
     } else {
 
         my %create_args = ();
-        foreach my $attr (@REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES) {
-            next unless exists $cmds{ lc $attr };
-            $create_args{$attr} = $cmds{ lc $attr };
+        foreach my $attribute (@REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES) {
+            next unless exists $cmds{ lc $attribute };
+
+            # canonicalize owner -- accept an e-mail address
+            if ( $attribute eq 'Owner' && $cmds{ lc $attribute } =~ /\@/ ) {
+                my $user = RT::User->new($RT::SystemUser);
+                $user->LoadByEmail( $cmds{ lc $attribute } );
+                $cmds{ lc $attribute } = $user->Name if $user->id;
+            }
+
+            $create_args{$attribute} = $cmds{ lc $attribute };
         }
         foreach my $attr (@DATE_ATTRIBUTES) {
             next unless exists $cmds{ lc $attr };
