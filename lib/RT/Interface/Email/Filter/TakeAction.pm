@@ -424,14 +424,14 @@ sub GetCurrentUser {
 
             $create_args{$attribute} = $cmds{ lc $attribute };
         }
-        foreach my $attr (@DATE_ATTRIBUTES) {
-            next unless exists $cmds{ lc $attr };
+        foreach my $attribute (@DATE_ATTRIBUTES) {
+            next unless exists $cmds{ lc $attribute };
             my $date = RT::Date->new( $args{'CurrentUser'} );
             $date->Set(
                 Format => 'unknown',
-                Value  => $cmds{ lc $attr }
+                Value  => $cmds{ lc $attribute }
             );
-            $create_args{$attr} = $date->ISO;
+            $create_args{$attribute} = $date->ISO;
         }
 
         # Canonicalize links

@@ -10,7 +10,7 @@ RT::Init();
 
 my $test_ticket_id;
 
-diag("simle test of the mailgate") if $ENV{'TEST_VERBOSE'};
+diag("simple test of the mailgate") if $ENV{'TEST_VERBOSE'};
 {
     my $text = <<END;
 Subject: test
