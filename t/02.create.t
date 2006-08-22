@@ -65,6 +65,30 @@ END
     is($obj->FinalPriority, $final_priority, 'set final priority' );
 } }
 
+diag("ignore multiple leading newlines") if $ENV{'TEST_VERBOSE'};
+{
+my $priority = 10; 
+my $final_priority = 15;
+    my $text = <<END;
+Subject: test
+From: root\@localhost
+
+
+
+
+Priority: $priority
+FinalPriority: $final_priority
+
+test
+END
+    my $id = create_ticket_via_gate( $text );
+    ok($id, "created ticket");
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    is($obj->Priority, $priority, 'set a header after multiple leading newlines' );
+}
+
 # XXX: these test are fail as 
 diag("set date on create") if $ENV{'TEST_VERBOSE'};
 foreach my $field ( qw(Due Starts Started) ) {
