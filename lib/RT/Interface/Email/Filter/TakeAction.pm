@@ -255,24 +255,30 @@ sub GetCurrentUser {
                 $args{'Ticket'}->$method->MemberEmailAddresses;
             } ];
             my ($add, $del) = _CompileAdditiveForUpdate( %tmp );
-            foreach ( @$del ) {
+            foreach my $text ( @$del ) {
+                my $user = RT::User->new($RT::SystemUser);
+                $user->LoadByEmail($text) if $text =~ /\@/;
+                $user->Load($text) unless $user->id;
                 my ( $val, $msg ) = $ticket_as_user->DeleteWatcher(
                     Type  => $type,
-                    Email => $_,
+                    PrincipalId => $user->PrincipalId,
                 );
                 push @{ $results{ 'Del'. $type } }, {
-                    value   => $_,
+                    value   => $text,
                     result  => $val,
                     message => $msg
                 };
             }
-            foreach ( @$add ) {
+            foreach my $text ( @$add ) {
+                my $user = RT::User->new($RT::SystemUser);
+                $user->LoadByEmail($text) if $text =~ /\@/;
+                $user->Load($text) unless $user->id;
                 my ( $val, $msg ) = $ticket_as_user->AddWatcher(
                     Type  => $type,
-                    Email => $_,
+                    PrincipalId => $user->PrincipalId,
                 );
                 push @{ $results{ 'Add'. $type } }, {
-                    value   => $_,
+                    value   => $text,
                     result  => $val,
                     message => $msg
                 };
