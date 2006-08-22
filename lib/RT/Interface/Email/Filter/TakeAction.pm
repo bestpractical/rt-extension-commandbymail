@@ -117,15 +117,15 @@ message.
 
 Manage custom field values. Could be used multiple times.
 
-    CustomField.{C<CFName>}: <custom field value>
-    AddCustomField.{C<CFName>}: <custom field value>
-    DelCustomField.{C<CFName>}: <custom field value>
+    CustomField.{<CFName>}: <custom field value>
+    AddCustomField.{<CFName>}: <custom field value>
+    DelCustomField.{<CFName>}: <custom field value>
 
 Short forms:
 
-    CF.{C<CFName>}: <custom field value>
-    AddCF.{C<CFName>}: <custom field value>
-    DelCF.{C<CFName>}: <custom field value>
+    CF.{<CFName>}: <custom field value>
+    AddCF.{<CFName>}: <custom field value>
+    DelCF.{<CFName>}: <custom field value>
 
 =cut
 
