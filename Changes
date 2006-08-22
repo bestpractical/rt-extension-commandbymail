@@ -1,5 +1,13 @@
 Revision history for RT-Extension-CommandByMail
 
+0.04
+* updated docs for 3.6.1
+* added a patch to 3.6.1 to include an In-Reply-To header on error mails
+* ignore multiple leading newlines before the pseudo-header paragraph
+* made Owner and Add/Del watcher commands accept both e-mail addresses and 
+  usernames
+* handle multiple TimeWorked: headers properly
+
 0.03
 * patch for RT-3.6.0
 * fix setting Owner
