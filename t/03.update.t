@@ -133,6 +133,32 @@ END
 }
 
 
+diag("handle multiple time worked statements") if $ENV{'TEST_VERBOSE'};
+{
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $test_ticket_id );
+    is($obj->id, $test_ticket_id, "loaded ticket");
+    my $current = $obj->TimeWorked;
+    ok($current, "time worked is greater than zero");
+
+    my $text = <<END;
+Subject: [$RT::rtname #$test_ticket_id] test
+From: root\@localhost
+
+TimeWorked: 5
+TimeWorked: 5
+
+test
+END
+    my $id = create_ticket_via_gate( $text );
+    is($id, $test_ticket_id, "updated ticket");
+    $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    is($obj->TimeWorked, $current + 10, 'set time' );
+}
+
+
 diag("set watchers on update") if $ENV{'TEST_VERBOSE'};
 foreach my $field ( qw(Requestor Cc AdminCc) ) {
     my $value = 'test@localhost';
@@ -152,6 +178,7 @@ END
     my $method = $field .'Addresses';
     is($obj->$method(), $value, 'set '. $field );
 }
+
 
 diag("add requestor on update") if $ENV{'TEST_VERBOSE'};
 {
