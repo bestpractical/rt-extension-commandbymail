@@ -295,8 +295,15 @@ sub GetCurrentUser {
 
         {
             my $time_taken = 0;
-            $time_taken = $cmds{'timeworked'} || 0
-                if grep $_ eq 'TimeWorked', @TIME_ATTRIBUTES;
+            if (grep $_ eq 'TimeWorked', @TIME_ATTRIBUTES) {
+                if (ref $cmds{'timeworked'}) { 
+                    map { $time_taken += ($_ || 0) }  @{ $cmds{'timeworked'} };
+                    $RT::Logger->debug("Time taken: $time_taken");
+                }
+                else {
+                    $time_taken = $cmds{'timeworked'} || 0;
+                }
+            }
 
             my $method = ucfirst $args{'Action'};
             my ($status, $msg) = $ticket_as_user->$method(
