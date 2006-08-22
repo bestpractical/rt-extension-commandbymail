@@ -176,6 +176,7 @@ sub GetCurrentUser {
 
     my @items;
     foreach my $line (@content) {
+        next if $line =~ /^\s*$/;
         last if $line !~ /^(?:(\S+)\s*?:\s*?(.*)\s*?|)$/;
         push( @items, $1 => $2 );
     }
