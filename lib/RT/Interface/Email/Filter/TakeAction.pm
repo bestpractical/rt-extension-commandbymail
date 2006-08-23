@@ -3,7 +3,7 @@ package RT::Interface::Email::Filter::TakeAction;
 use warnings;
 use strict;
 
-use RT::Interface::Email;
+use RT::Interface::Email qw(ParseCcAddressesFromHead);
 
 our @REGULAR_ATTRIBUTES = qw(Queue Owner Subject Status Priority FinalPriority);
 our @TIME_ATTRIBUTES    = qw(TimeWorked TimeLeft TimeEstimated);
