@@ -77,6 +77,7 @@ From: root\@localhost
 
 
 Priority: $priority
+
 FinalPriority: $final_priority
 
 test
@@ -86,7 +87,8 @@ END
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
-    is($obj->Priority, $priority, 'set a header after multiple leading newlines' );
+    is($obj->Priority, $priority, 'found priority after multiple leading newlines' );
+    isnt($obj->FinalPriority, $final_priority, 'did not set final priority' );
 }
 
 # XXX: these test are fail as 

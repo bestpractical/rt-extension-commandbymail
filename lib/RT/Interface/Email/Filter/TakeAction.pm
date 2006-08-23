@@ -176,9 +176,11 @@ sub GetCurrentUser {
     }
 
     my @items;
+    my $found_pseudoheaders = 0;
     foreach my $line (@content) {
-        next if $line =~ /^\s*$/;
+        next if $line =~ /^\s*$/ && ! $found_pseudoheaders;
         last if $line !~ /^(?:(\S+)\s*?:\s*?(.*)\s*?|)$/;
+        $found_pseudoheaders = 1;
         push( @items, $1 => $2 );
     }
     my %cmds;
