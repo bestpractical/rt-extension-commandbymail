@@ -1,47 +1,12 @@
-==== Patch <errors-in-reply-to> level 1
-Source: [No source]
-Target: 950bc6a1-dcf7-0310-b58a-e9c0bc523046:/local/RT-3.6-RELEASE:23279
-Log:
-* Patch to add an In-Reply-To: header to error e-mails so they get threaded
-properly
-=== lib/RT/Interface/Email.pm
-==================================================================
---- lib/RT/Interface/Email.pm	(revision 23279)
-+++ lib/RT/Interface/Email.pm	(patch errors-in-reply-to level 1)
-@@ -238,10 +238,12 @@
-         @_
-     );
- 
-+    my $message_id = $args{'MIMEObj'}->head->get('Message-Id');
-     $RT::Logger->log(
-         level   => $args{'LogLevel'},
-         message => $args{'Explanation'}
-     );
-+    $RT::Logger->debug("Message-ID: $message_id");
-     my $entity = MIME::Entity->build(
-         Type                   => "multipart/mixed",
-         From                   => $args{'From'},
-@@ -250,6 +252,7 @@
-         Subject                => $args{'Subject'},
-         Precedence             => 'bulk',
-         'X-RT-Loop-Prevention' => $RT::rtname,
-+        'In-Reply-To'          => $message_id,
-     );
- 
-     $entity->attach( Data => $args{'Explanation'} . "\n" );
-
-==== BEGIN SVK PATCH BLOCK ====
-Version: svk 1.99_01 (darwin)
-
-eJyFk09v0zAYxnPmxImzNXnqQPKaxPk/LSoSRarYYOo6OFZO/KYNSpPK8SYqjFD5JhyRGBJnPgZ8
-IBx3LZWYNJ8Svc/ze/3aj1+KycnAUWlqK+zY6vLtqyS5YDKfH+o/HCjgpWwE9lUFN1Bhqqpmhj1V
-swXoqmRiBjJNHW2ONuahMWwhXsfImGzqFscGNpUCADvKHwRq4KoB1Vbl6GKzhHoqmkbqZi51w1hX
-p92e8qppYdp5O73f6V3seBsDLwXkuuGq21qZGdbWTzu/f+f/J9SSHYjeAwo6UH88MX0eZLk7lncP
-y9nC+qNagihYDqbrg1i6w/rbsynKCrDr/wfsDxesrI6XC7OHB8nehmyqbLmsVlMJHySHSjLTjbrK
-y6kdQcxCGnLOY8gogyIM/byIiiLK9aFFXVReW9b6N13/uXqyfmzdttYva3lbf7e+fP7x7pu1/pr/
-vFisEF5A27IZTEuOThHWgWk/9s5H58M32fveJ5LOgXGS6hQd9c43SjLivacneDxJkrNmNgNBUg7Z
-9ezoYCd4kexzD5BevVFNxqDHIZOmh3brNN1XDrz9SJkDvRs5Cmye2WDzmINje27kcx7w0KVRllHP
-CUywIk89QybYSDaIcY5Yjfb6JqibBkRXBSEagYB0d9OitkFyDiuk59QfolPxR0uh71VUq+7tGHlL
-ypoIA5NNmroKu+7mVU3MQ0uSq7q8AdGy6jBQ+hkumZzr4Au40T/X1yXHrqP6VZOzSkeE0OOAjIdn
-w+eXw20uMA1U7NtZHjCH8LwIiU0dm2R+xAjEuS74LrW94C9JkVWE
-==== END SVK PATCH BLOCK ====
+240a241
+>     my $message_id = $args{'MIMEObj'}->head->get('Message-Id');
+244a246,247
+>     $RT::Logger->debug("Message-ID: $message_id");
+>     # the colons are necessary to make ->build include non-standard headers
+251,252c254,256
+<         Precedence             => 'bulk',
+<         'X-RT-Loop-Prevention' => $RT::rtname,
+---
+>         'Precedence:'             => 'bulk',
+>         'X-RT-Loop-Prevention:' => $RT::rtname,
+>         'In-Reply-To:'          => $message_id,
