@@ -1,5 +1,13 @@
 Revision history for RT-Extension-CommandByMail
 
+0.05
+* added a patch for 3.6.1 to /really/ include an In-Reply-To header on error
+  mails
+* attach the original message to the error message
+* use only the first stanza of pseudo-headers
+* handle multiple TimeWorked headers on create as well as update
+* explicitly import ParseCcAddressesFromHead
+
 0.04
 * updated docs for 3.6.1
 * added a patch to 3.6.1 to include an In-Reply-To header on error mails
