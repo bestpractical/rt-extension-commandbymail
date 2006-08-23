@@ -430,6 +430,13 @@ sub GetCurrentUser {
                 $cmds{ lc $attribute } = $user->Name if $user->id;
             }
 
+            if ( $attribute eq 'TimeWorked' && ref $cmds{ lc $attribute } ) {
+                my $time_taken = 0;
+                map { $time_taken += ($_ || 0) }  @{ $cmds{'timeworked'} };
+                $cmds{'timeworked'} = $time_taken;
+                $RT::Logger->debug("Time taken on create: $time_taken");
+            }
+
             $create_args{$attribute} = $cmds{ lc $attribute };
         }
         foreach my $attribute (@DATE_ATTRIBUTES) {

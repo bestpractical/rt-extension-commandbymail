@@ -133,6 +133,26 @@ END
 }
 
 
+diag("handle multiple time worked statements") if $ENV{'TEST_VERBOSE'};
+{
+    my $text = <<END;
+Subject: multiple TimeWorked test
+From: root\@localhost
+
+TimeWorked: 5
+TimeWorked: 5
+
+test
+END
+    my $id = create_ticket_via_gate( $text );
+    ok($id, "created ticket");
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    is($obj->TimeWorked, 10, 'set time' );
+}
+
+
 diag("set watchers on create") if $ENV{'TEST_VERBOSE'};
 foreach my $field ( qw(Requestor Cc AdminCc) ) {
     my $value = 'test@localhost';
