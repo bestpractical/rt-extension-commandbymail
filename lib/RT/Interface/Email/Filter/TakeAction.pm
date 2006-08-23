@@ -666,6 +666,7 @@ sub _ReportResults {
         Subject     => "Extended mailgate error",
         Explanation => $msg,
         MIMEObj     => $args{'Message'},
+        Attach      => $args{'Message'},
     );
     return;
 }
