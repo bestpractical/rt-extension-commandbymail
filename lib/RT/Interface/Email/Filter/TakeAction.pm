@@ -408,7 +408,7 @@ sub GetCurrentUser {
 
             _SetAttribute(
                 $ticket_as_user,        $attribute,
-                $cmds{ lc $attribute }, \%results
+                lc $cmds{ lc $attribute }, \%results
             );
         }
 
@@ -437,6 +437,10 @@ sub GetCurrentUser {
                 map { $time_taken += ($_ || 0) }  @{ $cmds{'timeworked'} };
                 $cmds{'timeworked'} = $time_taken;
                 $RT::Logger->debug("Time taken on create: $time_taken");
+            }
+
+            if ( $attribute eq 'Status' && $cmds{ lc $attribute } ) {
+                $cmds{ lc $attribute } = lc $cmds{ lc $attribute };
             }
 
             $create_args{$attribute} = $cmds{ lc $attribute };
