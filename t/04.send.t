@@ -7,8 +7,7 @@ use Test::More tests => 1;
 
 use File::Temp qw/ tempfile tempdir /;
 
-use RT;
-RT::LoadConfig;
+BEGIN { require 't/utils.pl' }
 RT::Init;
 
 diag("test errors via mailgate") if $ENV{'TEST_VERBOSE'};
@@ -26,9 +25,15 @@ END
 
     my ($fh, $filename) = tempfile();
     diag("Tempfile: $filename");
-    $RT::SendmailPath = "cat > $filename";
-    $RT::SendmailBounceArguments = '';
-    $RT::SendmailArguments = '';
+    if (RT->can('Config') && RT->Config->can('Set')) {
+        RT->Config->Set(SendmailPath => "cat > $filename");
+        RT->Config->Set(SendmailBounceArguments => '');
+        RT->Config->Set(SendmailArguments => '');
+    } else {
+        $RT::SendmailPath = "cat > $filename";
+        $RT::SendmailBounceArguments = '';
+        $RT::SendmailArguments = '';
+    }
 
     use RT::EmailParser;
     my $parser = RT::EmailParser->new();

@@ -95,7 +95,7 @@ END
 diag("set date on create") if $ENV{'TEST_VERBOSE'};
 foreach my $field ( qw(Due Starts Started) ) {
     my $value = '2005-12-01 12:34:00';
-    my $date_obj = RT::Date->new( $RT::System );
+    my $date_obj = RT::Date->new( $RT::SystemUser );
     $date_obj->Set( Format => 'unknown', Value => $value );
 
     my $text = <<END;
