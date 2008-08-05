@@ -1,5 +1,8 @@
 Revision history for RT-Extension-CommandByMail
 
+0.06
+* upgrade Module::Install::RTx and INSTALL to be more 3.8.x compatible
+
 0.05
 * added a patch for 3.6.1 to /really/ include an In-Reply-To header on error
   mails
