@@ -175,7 +175,7 @@ sub GetCurrentUser {
         my $group = RT::Group->new($args{'CurrentUser'});
         $group->Load($group_id);
 
-        unless ($group->HasMemberRecursively($args{'CurrentUser'}->Id)) {
+        if (!$group->HasMemberRecursively($args{'CurrentUser'}->PrincipalObj)) {
             return ($args{'CurrentUser'}, $args{'AuthLevel'});
         }
     }
