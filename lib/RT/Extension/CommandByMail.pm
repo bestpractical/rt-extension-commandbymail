@@ -39,7 +39,7 @@ to use this extension, so read the file.
 =head2 C<$CommandByMailGroup>
 
 You may set a C<$CommandByMailGroup> to a particular group ID in RT_SiteConfig.
-Setting this will forbid command by mail access to anyone not in the group.
+If set, only members of this group may perform commands by mail.
 
 =head1 CAVEATS
 
