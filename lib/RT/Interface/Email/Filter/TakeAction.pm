@@ -163,6 +163,23 @@ sub GetCurrentUser {
         return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
     }
 
+    # If only a particular group may perform commands by mail,
+    # bail out
+    my $old_config = $RT::VERSION =~ /3\.(\d+)/ && $1 < 7;
+    my $group_id = $old_config
+                 ? $RT::CommandByMailGroup
+                 : RT->Config->Get('CommandByMailGroup');
+
+    if (defined $group_id) {
+        my $group = RT::Group->new($args{'CurrentUser'});
+        $group->Load($group_id);
+
+        unless ($group->HasMemberRecursively($args{'CurrentUser'}->Id)) {
+            return ($args{'CurrentUser'}, $args{'AuthLevel'});
+        }
+    }
+
+    # find the content
     my @content;
     my @parts = $args{'Message'}->parts_DFS;
     foreach my $part (@parts) {
