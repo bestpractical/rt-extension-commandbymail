@@ -36,6 +36,11 @@ that applies to the RT in general also applies to the extension.
 Read L<INSTALL>. Note that you B<must patch> RT
 to use this extension, so read the file.
 
+=head2 C<$CommandByMailGroup>
+
+You may set a C<$CommandByMailGroup> to a particular group ID in RT_SiteConfig.
+Setting this will forbid command by mail access to anyone not in the group.
+
 =head1 CAVEATS
 
 This extension is incomatible with C<UnsafeEmailCommands> RT option.
