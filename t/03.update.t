@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 129;
+use Test::More tests => 134;
 
 BEGIN { require 't/utils.pl' }
 RT::Init();
@@ -288,5 +288,31 @@ END
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
     is($obj->FirstCustomFieldValue($cf_name), 'foo', 'correct cf value' );
+
+    my $content = $obj->Transactions->Last->Content;
+    like($content, qr/\QCustomField.{$cf_name}\E/, "valid CF command NOT stripped");
+}
+
+diag("commands must be at the start") if $ENV{'TEST_VERBOSE'};
+{
+    my $text = <<END;
+Subject: [$RT::rtname #$test_ticket_id] test
+From: root\@localhost
+
+hello
+
+Priority: 44
+
+test
+END
+    my $id = create_ticket_via_gate( $text );
+    is($id, $test_ticket_id, "updated ticket");
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    is($obj->Priority, 20, "commands must be at the start of the mail");
+
+    my $content = $obj->Transactions->Last->Content;
+    like($content, qr/Priority: 44/, "invalid Priority command not stripped");
 }
 
