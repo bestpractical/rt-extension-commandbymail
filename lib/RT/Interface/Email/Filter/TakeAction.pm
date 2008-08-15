@@ -152,7 +152,8 @@ sub GetCurrentUser {
         $RT::Logger->error(
             "Filter::TakeAction executed when "
             ."CurrentUser (actor) is not authorized. "
-            ."Most probably you want to add Auth::MailFrom plugin before."
+            ."Most probably you want to add Auth::MailFrom plugin before "
+            ."Filter::TakeAction in the \@MailPlugins config."
         );
         return ( $args{'CurrentUser'}, $args{'AuthLevel'} );
     }
