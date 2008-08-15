@@ -216,6 +216,9 @@ END
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
     is($obj->RequestorAddresses, 'test@localhost', 'del requestor' );
+
+    my $content = $obj->Transactions->Last->Content;
+    like($content, qr/DelRequestor/, "valid command NOT stripped");
 }
 
 my $link_ticket_id;
@@ -288,9 +291,6 @@ END
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
     is($obj->FirstCustomFieldValue($cf_name), 'foo', 'correct cf value' );
-
-    my $content = $obj->Transactions->Last->Content;
-    like($content, qr/\QCustomField.{$cf_name}\E/, "valid CF command NOT stripped");
 }
 
 diag("commands must be at the start") if $ENV{'TEST_VERBOSE'};
