@@ -166,10 +166,10 @@ sub GetCurrentUser {
 
     # If only a particular group may perform commands by mail,
     # bail out
-    my $old_config = $RT::VERSION =~ /3\.(\d+)/ && $1 < 7;
-    my $group_id = $old_config
-                 ? $RT::CommandByMailGroup
-                 : RT->Config->Get('CommandByMailGroup');
+    my $new_config = RT->can('Config') && RT->Config->can('Get');
+    my $group_id = $new_config
+                 ? RT->Config->Get('CommandByMailGroup')
+                 : $RT::CommandByMailGroup;
 
     if (defined $group_id) {
         my $group = RT::Group->new($args{'CurrentUser'});

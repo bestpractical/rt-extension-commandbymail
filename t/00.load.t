@@ -10,15 +10,15 @@ BEGIN {
 
 diag( "Testing RT::Extension::CommandByMail $RT::Extension::CommandByMail::VERSION" );
 
-my $old_config = $RT::VERSION =~ /3\.(\d+)/ && $1 < 7;
+my $new_config = RT->can('Config') && RT->Config->can('Get');
 
-my @plugins = $old_config
-            ? @RT::Plugins
-            : RT->Config->Get('Plugins');
+my @plugins = $new_config
+            ? RT->Config->Get('Plugins')
+            : @RT::Plugins;
 
-my @mail_plugins = $old_config
-                 ? @RT::MailPlugins
-                 : RT->Config->Get('MailPlugins');
+my @mail_plugins = $new_config
+                 ? RT->Config->Get('MailPlugins')
+                 : @RT::MailPlugins;
 
 my $complain = 0;
 ok((grep { $_ eq 'RT::Extension::CommandByMail' } @plugins), "RT::Extension::CommandByMail is in your config's \@Plugins") or $complain = 1;
