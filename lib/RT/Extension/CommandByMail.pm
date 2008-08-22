@@ -1,6 +1,6 @@
 package RT::Extension::CommandByMail;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07_01';
 
 1;
 __END__
@@ -49,10 +49,12 @@ This extension is incomatible with C<UnsafeEmailCommands> RT option.
 
 Jesse Vincent  C<< <jesse@bestpractical.com> >>
 Ruslan U. Zakirov  C<< <ruz@bestpractical.com> >>
+Kevin Falcone C<< <falcone@bestpractical.com> >>
+Shawn Moore C<< <sartak@bestpractical.com> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2006, Best Practical Solutions, LLC.  All rights reserved.
+Copyright (c) 2006-2008, Best Practical Solutions, LLC.  All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.

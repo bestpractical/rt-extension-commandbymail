@@ -23,4 +23,4 @@ no_index:
 requires: 
   MIME::Entity: 5.420
   UNIVERSAL::require: 0
-version: 0.06
+version: 0.07_01
