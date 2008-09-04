@@ -23,9 +23,9 @@ If you are using RT 3.6.1 or later, you no longer need to apply a patch.
 
 CONFIGURE
 
-Add 'Filter::TakeAction' to the list of mail plugins in the RT config.  (You'll
-need to add Auth::MailFrom to the list as well if you want to run the test 
-suite.  Auth::MailFrom is distributed with RT as 
+Add 'Filter::TakeAction' to the list of mail plugins in RT_SiteConfig.pm.
+(You'll need to add Auth::MailFrom to the list as well if you want to run the
+test suite.  Auth::MailFrom is distributed with RT as
 RT::Interface::Email::Auth::MailFrom.)
 
 Restart web server.
