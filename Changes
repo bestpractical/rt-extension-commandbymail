@@ -1,5 +1,9 @@
 Revision history for RT-Extension-CommandByMail
 
+0.07_01
+* Add CommandByMailGroup configuration option to 
+  limit who can use commands
+
 0.06
 * upgrade Module::Install::RTx and INSTALL to be more 3.8.x compatible
 
