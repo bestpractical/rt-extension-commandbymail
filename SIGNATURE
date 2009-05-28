@@ -17,23 +17,23 @@ Hash: SHA1
 SHA1 bc519a592e19274d19486cba2319a1ede24258cf Changes
 SHA1 76014226d8a0d93706706227135f5e90b6b4e240 INSTALL
 SHA1 94a33de8c15d5b8fe804d402e1be6fe5110a3acc MANIFEST
-SHA1 3ed3336328b19ac5d925ddcf7160d85b0cbd5ce9 META.yml
+SHA1 41f1ad9778ddeece2defdb1ffcc229a52f5371ee META.yml
 SHA1 a11133e06ca757a45bccd9b48a8e861ed272bd7e Makefile.PL
 SHA1 c8821369c7ae7a17e33b057b17972f9a0019ad80 README
-SHA1 603bb9de29fb8cba7f13409c546750972eff645d inc/Module/AutoInstall.pm
-SHA1 8b836389e4bc170eb8d19b7296b2f4978ac36136 inc/Module/Install.pm
-SHA1 182a0df45b65151afdc2be0b7246a2d02d0f0567 inc/Module/Install/AutoInstall.pm
-SHA1 85b32a1d5f215d99f411c3dd6113b537fcd5c57d inc/Module/Install/Base.pm
-SHA1 fde745e180861c7c0ba3ee5a767cafdbdb1d3ebd inc/Module/Install/Can.pm
-SHA1 e259400ceb54c34def9c994f52d7091108ce7ffc inc/Module/Install/Fetch.pm
-SHA1 ecd277fcac91f6901ad652d5d58b515d0412b306 inc/Module/Install/Include.pm
-SHA1 da42b522e5a7ffbae0ceec900f3635ad9990c565 inc/Module/Install/Makefile.pm
-SHA1 ba005818ee9f97146bfa4e14e53c684e9e446902 inc/Module/Install/Metadata.pm
-SHA1 8f48773e8fb4cc4db0fc4a1aa9c24fc0df1f0e49 inc/Module/Install/RTx.pm
+SHA1 e5fb92ac217988bfc7a6af739b0459627020a27e inc/Module/AutoInstall.pm
+SHA1 fd5f3c4f0418efee3b9b16cf8c3902e8374909df inc/Module/Install.pm
+SHA1 5c529e96420d964b192f011b121283a4916f7331 inc/Module/Install/AutoInstall.pm
+SHA1 7cd7c349afdf3f012e475507b1017bdfa796bfbd inc/Module/Install/Base.pm
+SHA1 ba186541bbf6439111f01fc70769cf24d22869bf inc/Module/Install/Can.pm
+SHA1 aaa50eca0d7751db7a4d953fac9bc72c6294e238 inc/Module/Install/Fetch.pm
+SHA1 219da5a95c290312a81477b226f005997d97dcfd inc/Module/Install/Include.pm
+SHA1 3e83972921d54198d1246f7278f08664006cd65d inc/Module/Install/Makefile.pm
+SHA1 12bf1867955480d47d5171a9e9c6a96fabe0b58f inc/Module/Install/Metadata.pm
+SHA1 4c845c66385929c9d080228ddf2e730066b310d3 inc/Module/Install/RTx.pm
 SHA1 13c903897bad7f0fdd7871a4a0182ff62dfbefd5 inc/Module/Install/Substitute.pm
-SHA1 85e6b1cf5b7ca81bfb469a99389fa947d4b8a08e inc/Module/Install/Win32.pm
-SHA1 d32dff9f0d2f02023ca6d79a48d62fd855916351 inc/Module/Install/WriteAll.pm
-SHA1 cff521c18114d22477d3d9753c6d15c23f87af3a lib/RT/Extension/CommandByMail.pm
+SHA1 f7ee667e878bd2faf22ee9358a7b5a2cc8e91ba4 inc/Module/Install/Win32.pm
+SHA1 8ed29d6cf217e0977469575d788599cbfb53a5ca inc/Module/Install/WriteAll.pm
+SHA1 560118776e6b74b41a85e4369733f6e2c03deb27 lib/RT/Extension/CommandByMail.pm
 SHA1 8e2053fe1a7e9f65d04c2e75ca794cd74ca2025d lib/RT/Interface/Email/Filter/TakeAction.pm
 SHA1 cf2c3c834f624767534204ed9e08a8f27d976fff patch/command_by_email-0.1-RT-3.4.2.patch
 SHA1 7b0a3b9f38d5214c10030d9d840a94e7511500f3 patch/command_by_email-0.1-RT-3.4.3.patch
@@ -48,11 +48,11 @@ SHA1 de2693bef22e58455258c877d8de5c8a1c3358df t/03.update.t
 SHA1 2fc21c5d4714815329be9496745abbc3a1729a9e t/04.send.t
 SHA1 6da39b48ce64b584e4c3274bff96fc76ff484820 t/pod-coverage.t
 SHA1 0190346d7072d458c8a10a45c19f86db641dcc48 t/pod.t
-SHA1 f6ded2df192f2ccc2e5a1647eab4dd182f0d6bee t/utils.pl
+SHA1 297292480c5eff44ffa62a72573e031cf146bfbf t/utils.pl
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.8 (Darwin)
 
-iEYEARECAAYFAkoe75EACgkQ0+gKWp5CJQqd+ACgh7L5KFq429PF5xZkxiuNOgId
-obcAoMvOHy1gp9oPlEB1Yq3J0CF9ifn4
-=gLSD
+iEYEARECAAYFAkoe8Y8ACgkQ0+gKWp5CJQrDngCeL8cBv3oo1xxQWRDVhlZbLef2
+VDgAoOL36KGrPLFfjXQ4hoI/6ZXnOFDp
+=i7Tb
 -----END PGP SIGNATURE-----
