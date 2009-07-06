@@ -1,5 +1,11 @@
 Revision history for RT-Extension-CommandByMail
 
+0.07
+* Release changes from dev versions
+
+0.07_02 
+* packaging screwup release
+
 0.07_01
 * Add CommandByMailGroup configuration option to 
   limit who can use commands
