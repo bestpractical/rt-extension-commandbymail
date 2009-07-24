@@ -187,7 +187,7 @@ sub GetCurrentUser {
         my $body = $part->bodyhandle or next;
 
         #if it looks like it has pseudoheaders, that's our content
-        if ( $body->as_string =~ /^(?:\S+):/m ) {
+        if ( $body->as_string =~ /^(?:\S+)(?:{.*})?:/m ) {
             @content = $body->as_lines;
             last;
         }
@@ -197,7 +197,7 @@ sub GetCurrentUser {
     my $found_pseudoheaders = 0;
     foreach my $line (@content) {
         next if $line =~ /^\s*$/ && ! $found_pseudoheaders;
-        last if $line !~ /^(?:(\S+)\s*?:\s*?(.*)\s*?|)$/;
+        last if $line !~ /^(?:(\S+(?:{.*})?)\s*?:\s*?(.*)\s*?|)$/;
         $found_pseudoheaders = 1;
         push( @items, $1 => $2 );
     }

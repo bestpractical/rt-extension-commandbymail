@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 140;
+use Test::More tests => 144;
 
 BEGIN { require 't/utils.pl' }
 RT::Init();
@@ -247,6 +247,30 @@ diag("set custom fields on create") if $ENV{'TEST_VERBOSE'};
     require RT::CustomField;
     my $cf = RT::CustomField->new( $RT::SystemUser );
     my $cf_name = 'test'.rand $$;
+    $cf->Create( Name => $cf_name, Queue => 0, Type => 'Freeform' );
+    ok($cf->id, "created global CF");
+
+    my $text = <<END;
+Subject: test
+From: root\@localhost
+
+CustomField.{$cf_name}: foo
+
+test
+END
+    my $id = create_ticket_via_gate( $text );
+    ok($id, "created ticket");
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    is($obj->FirstCustomFieldValue($cf_name), 'foo', 'correct cf value' );
+}
+
+diag("set custom fields with whitespace on create") if $ENV{'TEST_VERBOSE'};
+{
+    require RT::CustomField;
+    my $cf = RT::CustomField->new( $RT::SystemUser );
+    my $cf_name = 'te st'.rand $$;
     $cf->Create( Name => $cf_name, Queue => 0, Type => 'Freeform' );
     ok($cf->id, "created global CF");
 
