@@ -1,5 +1,7 @@
 Revision history for RT-Extension-CommandByMail
 
+* Loosen up a regex to catch CFs with spaces in their names
+
 0.07
 * Release changes from dev versions
 
