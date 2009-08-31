@@ -14,12 +14,12 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 bc519a592e19274d19486cba2319a1ede24258cf Changes
+SHA1 237172a6de9de44ea8057d4a1726703e0015dd4e Changes
 SHA1 76014226d8a0d93706706227135f5e90b6b4e240 INSTALL
 SHA1 94a33de8c15d5b8fe804d402e1be6fe5110a3acc MANIFEST
 SHA1 c8880824e050867733f68b8969e5f18aeee12558 META.yml
 SHA1 a11133e06ca757a45bccd9b48a8e861ed272bd7e Makefile.PL
-SHA1 c8821369c7ae7a17e33b057b17972f9a0019ad80 README
+SHA1 abc00eba575f6b160ae15e11666ef1cb7db2ebd1 README
 SHA1 e5fb92ac217988bfc7a6af739b0459627020a27e inc/Module/AutoInstall.pm
 SHA1 fd5f3c4f0418efee3b9b16cf8c3902e8374909df inc/Module/Install.pm
 SHA1 5c529e96420d964b192f011b121283a4916f7331 inc/Module/Install/AutoInstall.pm
@@ -34,7 +34,7 @@ SHA1 13c903897bad7f0fdd7871a4a0182ff62dfbefd5 inc/Module/Install/Substitute.pm
 SHA1 f7ee667e878bd2faf22ee9358a7b5a2cc8e91ba4 inc/Module/Install/Win32.pm
 SHA1 8ed29d6cf217e0977469575d788599cbfb53a5ca inc/Module/Install/WriteAll.pm
 SHA1 845ae51a4f57665b37cce4f7c06348fdd613f99d lib/RT/Extension/CommandByMail.pm
-SHA1 8e2053fe1a7e9f65d04c2e75ca794cd74ca2025d lib/RT/Interface/Email/Filter/TakeAction.pm
+SHA1 b9bc1bbdf913cabbe41a8a1fb26d78e8bb2bb7e9 lib/RT/Interface/Email/Filter/TakeAction.pm
 SHA1 cf2c3c834f624767534204ed9e08a8f27d976fff patch/command_by_email-0.1-RT-3.4.2.patch
 SHA1 7b0a3b9f38d5214c10030d9d840a94e7511500f3 patch/command_by_email-0.1-RT-3.4.3.patch
 SHA1 7b0a3b9f38d5214c10030d9d840a94e7511500f3 patch/command_by_email-0.1-RT-3.4.4.patch
@@ -43,16 +43,16 @@ SHA1 698501dd38dfed7330b62eb4f5e39c51ca434330 patch/command_by_email-0.1-RT-3.6.
 SHA1 37c72e9eb8010b1437af329e2f7e7b06377d39aa patch/errors_in_reply_to-RT-3.6.1.patch
 SHA1 9a99022442d9c378ab5b08376e46e86266e6ffa2 t/00.load.t
 SHA1 2d69b2e755d2fa6dd157f0eb6ac973310e64bb52 t/01.internals.t
-SHA1 45fbffccf45b99fd863ef887fdf773361b0dd89f t/02.create.t
+SHA1 1b5b9d3feeaccb4ea89007d081d56281efb41927 t/02.create.t
 SHA1 de2693bef22e58455258c877d8de5c8a1c3358df t/03.update.t
-SHA1 2fc21c5d4714815329be9496745abbc3a1729a9e t/04.send.t
+SHA1 9d764cd745e6e126dbd6083a800d553cfa79f3ae t/04.send.t
 SHA1 6da39b48ce64b584e4c3274bff96fc76ff484820 t/pod-coverage.t
 SHA1 0190346d7072d458c8a10a45c19f86db641dcc48 t/pod.t
-SHA1 2f07671e9e93056890ddda7c74e0960d9dc45026 t/utils.pl
+SHA1 297292480c5eff44ffa62a72573e031cf146bfbf t/utils.pl
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.8 (Darwin)
+Version: GnuPG v1.4.9 (Darwin)
 
-iEYEARECAAYFAkpNLFQACgkQ0+gKWp5CJQrAMACfa5NWJok81HIP2Z93apCeT3kK
-O/sAoNwu6jKrDGaEy9Un/XVkzs5NAnde
-=k8Os
+iEYEARECAAYFAkqb6aoACgkQ0+gKWp5CJQrBzACcDDNzyp56kUFJyMh0z7b18ICQ
+XoIAoNXR0yg5hLb7EfITD1YlHcpMgEm4
+=g4tO
 -----END PGP SIGNATURE-----
