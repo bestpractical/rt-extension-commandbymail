@@ -176,9 +176,12 @@ sub GetCurrentUser {
         $group->Load($group_id);
 
         if (!$group->HasMemberRecursively($args{'CurrentUser'}->PrincipalObj)) {
+            $RT::Logger->debug("CurrentUser not in CommandByMailGroup");
             return ($args{'CurrentUser'}, $args{'AuthLevel'});
         }
     }
+
+    $RT::Logger->debug("Running CommandByMail as ".$args{'CurrentUser'}->UserObj->Name);
 
     # find the content
     my @content;
@@ -200,12 +203,14 @@ sub GetCurrentUser {
         last if $line !~ /^(?:(\S+(?:{.*})?)\s*?:\s*?(.*)\s*?|)$/;
         $found_pseudoheaders = 1;
         push( @items, $1 => $2 );
+        $RT::Logger->debug("Found pseudoheader: $1 => $2");
     }
     my %cmds;
     while ( my $key = _CanonicalizeCommand( lc shift @items ) ) {
         my $val = shift @items;
         # strip leading and trailing spaces
         $val =~ s/^\s+|\s+$//g;
+        $RT::Logger->debug("Got command $key => $val");
 
         if ( exists $cmds{$key} ) {
             $cmds{$key} = [ $cmds{$key} ] unless ref $cmds{$key};
@@ -241,6 +246,7 @@ sub GetCurrentUser {
     # If we're updating.
     if ( $args{'Ticket'}->id ) {
         $ticket_as_user->Load( $args{'Ticket'}->id );
+        $RT::Logger->debug("Updating Ticket ".$ticket_as_user->Id." in Queue ".$queue->Name);
 
         # we set status later as correspond can reopen ticket
         foreach my $attribute (grep !/^(Status|TimeWorked)/, @REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES) {
