@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 144;
+use Test::More tests => 147;
 
 BEGIN { require 't/utils.pl' }
 RT::Init();
@@ -300,6 +300,12 @@ diag("accept watcher as username and email address") if $ENV{'TEST_VERBOSE'};
     my ($id, $msg) = $queue->Create( Name => $queue_name );
     ok($id, "Created queue '$queue_name'? $msg");
 
+    require RT::CustomField;
+    my $cf = RT::CustomField->new( $RT::SystemUser );
+    my $cf_name = 'test'.rand $$;
+    $cf->Create( Name => $cf_name, Queue => $queue->Id, Type => 'Freeform' );
+    ok($cf->id, "created queue CF");
+
     my $user_name = "WatcherCommandTest$$";
     my $user_email = "watchercommand$$\@example.com";
 
@@ -322,6 +328,7 @@ From: root\@localhost
 
 Queue: $queue_name
 Owner: $owner
+CF.{$cf_name}: fro'b
 
 owner test
 END
@@ -333,6 +340,7 @@ END
         ok( $ticket->IsWatcher( Type => 'Owner', 
             PrincipalId => $user->PrincipalId ), "set '$owner' as Owner"
         );
+        is($ticket->FirstCustomFieldValue($cf_name), "fro'b", 'correct cf value' );
     }
 
     foreach my $cc ( $user_name, $user_email ) {
