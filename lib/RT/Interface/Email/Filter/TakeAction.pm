@@ -266,6 +266,12 @@ sub GetCurrentUser {
             );
         }
 
+        # we want the queue the ticket is currently in, not the queue
+        # that was passed to rt-mailgate, otherwise we can't find the
+        # proper set of Custom Fields.  But, we have to do this after 
+        # we potentially update the Queue from @REGULAR_ATTRIBUTES
+        $queue = $ticket_as_user->QueueObj();
+
         foreach my $attribute (@DATE_ATTRIBUTES) {
             next unless ( $cmds{ lc $attribute } );
 
