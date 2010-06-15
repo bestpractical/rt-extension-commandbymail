@@ -26,6 +26,9 @@ You put commands into beginning of a mail and extension applies
 them. See the list of commands in the
 L<RT::Interface::Email::Filter::TakeAction> docs.
 
+CAVEAT: commands are line oriented, so you can't expand to multiple
+lines for each command, i.e. values can't contains new lines.
+
 =head1 SECURITY
 
 This extension has no extended auth system, so all security issues
