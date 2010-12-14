@@ -1,4 +1,6 @@
 Revision history for RT-Extension-CommandByMail
+0.08
+* Add a note about line breaks
 
 0.08_01
 * Loosen up a regex to catch CFs with spaces in their names
