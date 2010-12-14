@@ -1,7 +1,7 @@
 ---
 abstract: 'Change metadata of ticket via email'
 author:
-  - 'Jesse Vincent <jesse@bestpractical.com>'
+  - 'Jesse Vincent  C<< <jesse@bestpractical.com> >>'
 build_requires:
   ExtUtils::MakeMaker: 6.42
   IPC::Open2: 0
@@ -9,7 +9,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.91'
+generated_by: 'Module::Install version 1.00'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -24,4 +24,4 @@ requires:
   UNIVERSAL::require: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.08_01
+version: 0.08

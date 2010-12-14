@@ -1,6 +1,6 @@
 package RT::Extension::CommandByMail;
 
-our $VERSION = '0.08_01';
+our $VERSION = '0.08';
 
 1;
 __END__
