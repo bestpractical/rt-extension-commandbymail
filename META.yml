@@ -2,6 +2,7 @@
 abstract: 'Change metadata of ticket via email'
 author:
   - 'Jesse Vincent  C<< <jesse@bestpractical.com> >>'
+  - 'Jesse Vincent <jesse@bestpractical.com>'
 build_requires:
   ExtUtils::MakeMaker: 6.42
   IPC::Open2: 0
@@ -24,4 +25,4 @@ requires:
   UNIVERSAL::require: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.08
+version: 0.09

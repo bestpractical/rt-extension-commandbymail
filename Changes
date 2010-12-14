@@ -1,4 +1,8 @@
 Revision history for RT-Extension-CommandByMail
+
+0.09
+* fixup because signature was wrong for 0.08
+
 0.08
 * Add a note about line breaks
 
