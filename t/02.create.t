@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 147;
+use Test::More tests => 144;
 
 BEGIN { require 't/utils.pl' }
 RT::Init();
@@ -28,7 +28,7 @@ END
 
 # XXX: use statuses from config/libs
 diag("set status on create") if $ENV{'TEST_VERBOSE'};
-foreach my $status ( qw(new open stalled rejected) ) {
+foreach my $status ( qw(new open resolved) ) {
     my $text = <<END;
 Subject: test
 From: root\@localhost
