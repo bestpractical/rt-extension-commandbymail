@@ -148,7 +148,7 @@ sub GetCurrentUser {
         @_
     );
 
-    unless ( $args{'CurrentUser'} ) {
+    unless ( $args{'CurrentUser'} && $args{'CurrentUser'}->Id ) {
         $RT::Logger->error(
             "Filter::TakeAction executed when "
             ."CurrentUser (actor) is not authorized. "
