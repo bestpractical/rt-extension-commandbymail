@@ -27,12 +27,12 @@ END
     diag("Tempfile: $filename");
     if (RT->can('Config') && RT->Config->can('Set')) {
         RT->Config->Set(MailCommand => 'sendmailpipe');
-        RT->Config->Set(SendmailPath => "cat > $filename");
+        RT->Config->Set(SendmailPath => "cat > $filename;");
         RT->Config->Set(SendmailBounceArguments => '');
         RT->Config->Set(SendmailArguments => '');
     } else {
         $RT::MailCommand = 'sendmailpipe';
-        $RT::SendmailPath = "cat > $filename";
+        $RT::SendmailPath = "cat > $filename;";
         $RT::SendmailBounceArguments = '';
         $RT::SendmailArguments = '';
     }
