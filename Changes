@@ -1,5 +1,10 @@
 Revision history for RT-Extension-CommandByMail
 
+0.10
+* test fixes for 4.0
+* skip on unloaded current user
+* make it harder to accidentally run tests that will hurt your production database
+
 0.09
 * fixup because signature was wrong for 0.08
 
