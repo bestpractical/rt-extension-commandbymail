@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More tests => 134;
 
-BEGIN { require 't/utils.pl' }
+BEGIN { require 'xt/utils.pl' }
 RT::Init();
 
 my $test_ticket_id;

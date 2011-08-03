@@ -1,6 +1,6 @@
 use Test::More tests => 5;
 
-BEGIN { require 't/utils.pl' }
+BEGIN { require 'xt/utils.pl' }
 BEGIN {
     use_ok( 'RT' );
     RT::LoadConfig();

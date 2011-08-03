@@ -7,7 +7,7 @@ use Test::More tests => 1;
 
 use File::Temp qw/ tempfile tempdir /;
 
-BEGIN { require 't/utils.pl' }
+BEGIN { require 'xt/utils.pl' }
 RT::Init;
 
 diag("test errors via mailgate") if $ENV{'TEST_VERBOSE'};

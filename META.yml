@@ -19,7 +19,7 @@ name: RT-Extension-CommandByMail
 no_index:
   directory:
     - inc
-    - t
+    - xt
 requires:
   MIME::Entity: 5.420
   UNIVERSAL::require: 0

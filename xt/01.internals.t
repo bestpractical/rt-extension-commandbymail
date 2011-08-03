@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More tests => 24;
 
-BEGIN { require 't/utils.pl' }
+BEGIN { require 'xt/utils.pl' }
 use_ok('RT');
 RT::LoadConfig();
 

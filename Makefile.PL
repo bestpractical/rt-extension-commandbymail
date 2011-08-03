@@ -25,9 +25,10 @@ substitute(
         RT_BIN_PATH  => $bin_path,
         RT_SBIN_PATH => $sbin_path,
     },
-    qw(t/utils.pl),
+    qw(xt/utils.pl),
 );
 
+author_tests('xt');
 
 sign;
 WriteAll();
