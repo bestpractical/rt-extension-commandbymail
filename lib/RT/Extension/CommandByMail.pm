@@ -46,7 +46,7 @@ If set, only members of this group may perform commands by mail.
 
 =head1 CAVEATS
 
-This extension is incomatible with C<UnsafeEmailCommands> RT option.
+This extension is incompatible with C<UnsafeEmailCommands> RT option.
 
 =head1 AUTHOR
 
