@@ -37,11 +37,11 @@ or any similar plugin that loads a current user object.
 
 You can do this by adding the following line to your RT::SiteConfig:
 
-@MailPlugins = qw(Auth::MailFrom Filter::TakeAction);
-
-If you are running RT-3.8 and above you will need to use slightly different syntax
-
 Set(@MailPlugins, qw(Auth::MailFrom Filter::TakeAction));
+
+If you are running a version of RT before 3.8, you will need to write.
+
+@MailPlugins = qw(Auth::MailFrom Filter::TakeAction);
 
 You will also need to add RT::Extension::CommandByMail to your
 Plugins list.
@@ -50,7 +50,7 @@ Set(@Plugins,(qw(RT::Extension::CommandByMail)))
 
 There is an optional configuration option CommandByMailGroup
 Set($CommandByMailGroup, group_id);
-You can find the id in 3.8 by browsing to Configuration -> Groups
+You can find the id by browsing to Configuration -> Groups
 
 Enjoy.
 
