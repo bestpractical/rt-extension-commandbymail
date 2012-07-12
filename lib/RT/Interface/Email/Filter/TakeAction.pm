@@ -18,8 +18,8 @@ RT::Interface::Email::Filter::TakeAction - Change metadata of ticket via email
 
 =head1 DESCRIPTION
 
-This extension parse content of incomming messages for list commands. Format
-of commands is:
+This extension parses the body and headers of incoming messages for
+list commands. Format of commands is:
 
     Command: value
     Command: value
@@ -183,6 +183,10 @@ sub GetCurrentUser {
 
     $RT::Logger->debug("Running CommandByMail as ".$args{'CurrentUser'}->UserObj->Name);
 
+    my $headername = $new_config
+	    ? RT->Config->Get('CommandByMailHeader')
+	    : $RT::CommandByMailHeader;
+
     # find the content
     my @content;
     my @parts = $args{'Message'}->parts_DFS;
@@ -194,6 +198,10 @@ sub GetCurrentUser {
             @content = $body->as_lines;
             last;
         }
+    }
+
+    if (defined $headername) {
+	    unshift @content, $args{'Message'}->head->get_all($headername);
     }
 
     my @items;

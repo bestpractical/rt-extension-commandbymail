@@ -10,8 +10,8 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 DESCRIPTION
-    This extension parse content of incoming messages for list commands.
-    Format of commands is:
+    This extension parses the body and headers of incoming messages
+    for list commands. Format of commands is:
 
         Command: value
         Command: value
