@@ -25,7 +25,7 @@ substitute(
         RT_BIN_PATH  => $bin_path,
         RT_SBIN_PATH => $sbin_path,
     },
-    qw(xt/utils.pl),
+    qw(xt/utils.pl lib/RT/Extension/CommandByMail/Test.pm),
 );
 
 author_tests('xt');
