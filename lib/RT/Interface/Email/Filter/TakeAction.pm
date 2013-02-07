@@ -284,7 +284,7 @@ sub GetCurrentUser {
             );
             _SetAttribute( $ticket_as_user, $attribute, $date->ISO,
                 \%results );
-            $results{ lc $attribute }->{value} = $cmds{ lc $attribute };
+            $results{ $attribute }->{value} = $cmds{ lc $attribute };
         }
 
         foreach my $type ( @WATCHER_ATTRIBUTES ) {
