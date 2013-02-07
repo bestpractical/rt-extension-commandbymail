@@ -1,7 +1,7 @@
 use 5.008003;
 package RT::Extension::CommandByMail;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 1;
 __END__
