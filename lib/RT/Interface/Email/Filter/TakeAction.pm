@@ -208,7 +208,7 @@ sub GetCurrentUser {
         $RT::Logger->debug("Found pseudoheader: $1 => $2");
     }
     my %cmds;
-    while ( my $key = _CanonicalizeCommand( lc shift @items ) ) {
+    while ( my $key = _CanonicalizeCommand( shift @items ) ) {
         my $val = shift @items;
         # strip leading and trailing spaces
         $val =~ s/^\s+|\s+$//g;
@@ -650,6 +650,9 @@ sub _SetAttribute {
 
 sub _CanonicalizeCommand {
     my $key = shift;
+    return $key unless defined $key;
+
+    $key = lc $key;
     # CustomField commands
     $key =~ s/^(add|del|)c(?:ustom)?-?f(?:ield)?\.?[({\[](.*)[)}\]]$/$1customfield{$2}/i;
     return $key;
