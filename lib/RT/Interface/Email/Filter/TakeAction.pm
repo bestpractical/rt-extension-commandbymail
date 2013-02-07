@@ -317,7 +317,10 @@ sub GetCurrentUser {
                 $user->Load($text) unless $user->id;
                 my ( $val, $msg ) = $ticket_as_user->AddWatcher(
                     Type  => $type,
-                    PrincipalId => $user->PrincipalId,
+                    $user->id
+                        ? (PrincipalId => $user->PrincipalId)
+                        : (Email => $text)
+                    ,
                 );
                 push @{ $results{ 'Add'. $type } }, {
                     value   => $text,
