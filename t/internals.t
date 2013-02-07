@@ -1,13 +1,7 @@
-#!/usr/bin/perl
-
 use strict;
 use warnings;
 
-use Test::More tests => 24;
-
-BEGIN { require 'xt/utils.pl' }
-use_ok('RT');
-RT::LoadConfig();
+use RT::Extension::CommandByMail::Test tests => undef, nodb => 1;
 
 use_ok('RT::Interface::Email::Filter::TakeAction');
 
@@ -140,3 +134,5 @@ diag( "test _CompileAdditiveForUpdate") if $ENV{'TEST_VERBOSE'};
     );
     is_deeply(\@res, [[],[]], 'del not current: do nothing');
 }
+
+done_testing();

@@ -1,12 +1,9 @@
-#!/usr/bin/perl
-
 use strict;
 use warnings;
 
-use Test::More tests => 144;
-
-BEGIN { require 'xt/utils.pl' }
-RT::Init();
+use RT::Extension::CommandByMail::Test tests => undef;
+my $test = 'RT::Extension::CommandByMail::Test';
+RT->Config->Set('MailPlugins', 'Auth::MailFrom', 'Filter::TakeAction');
 
 my $test_ticket_id;
 
@@ -18,7 +15,7 @@ From: root\@localhost
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -37,7 +34,7 @@ Status: $status
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -56,7 +53,7 @@ FinalPriority: $final_priority
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -82,7 +79,7 @@ FinalPriority: $final_priority
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -106,7 +103,7 @@ $field: $value
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -126,7 +123,7 @@ $field: $value
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -146,7 +143,7 @@ TimeWorked: 5
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -166,7 +163,7 @@ $field: $value
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -186,7 +183,7 @@ AddRequestor: $value
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -204,7 +201,7 @@ DelRequestor: root\@localhost
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -222,7 +219,7 @@ $field: $test_ticket_id
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -258,7 +255,7 @@ CustomField.{$cf_name}: foo
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -282,7 +279,7 @@ CustomField.{$cf_name}: foo
 
 test
 END
-    my $id = create_ticket_via_gate( $text );
+    my (undef, $id) = $test->send_via_mailgate( $text );
     ok($id, "created ticket");
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
@@ -332,7 +329,7 @@ CF.{$cf_name}: fro'b
 
 owner test
 END
-        $id = create_ticket_via_gate( $text );
+        (undef, $id) = $test->send_via_mailgate( $text );
         ok($id, "created ticket");
         my $ticket = RT::Ticket->new($RT::SystemUser);
         $ticket->Load( $id );
@@ -353,7 +350,7 @@ Cc: $cc
 
 cc test
 END
-        $id = create_ticket_via_gate( $text );
+        (undef, $id) = $test->send_via_mailgate( $text );
         ok($id, "created ticket");
         my $ticket = RT::Ticket->new($RT::SystemUser);
         $ticket->Load( $id );
@@ -365,4 +362,4 @@ END
 
 }
 
-1;
+done_testing();
