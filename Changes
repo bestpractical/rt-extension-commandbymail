@@ -1,5 +1,13 @@
 Revision history for RT-Extension-CommandByMail
 
+0.11
+* get rid of uninit warnings
+* make tests create DBs rather then re-use production
+* use RT's infrastructure in tests
+* fix reporting for dates changes
+* handle adding watchers when user is not in the DB
+* support Transaction Custom Fields
+
 0.10
 * test fixes for 4.0
 * skip on unloaded current user
