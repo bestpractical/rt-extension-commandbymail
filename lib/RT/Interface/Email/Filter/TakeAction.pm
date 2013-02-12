@@ -568,9 +568,10 @@ sub GetCurrentUser {
         while ( my $cf = $custom_fields->Next ) {
             my $cmd = 'TransactionCustomField{'. $cf->Name .'}';
             my @values = ($cmds{ lc $cmd });
-            next unless @values && $values[0];
-
             @values = @{ $values[0] } if ref $values[0] eq 'ARRAY';
+            @values = grep defined && length, @values;
+            next unless @values;
+
             foreach my $value ( @values ) {
                 my ($status, $msg) = $transaction->AddCustomFieldValue(
                     Field => $cf->Name, Value => $value,
