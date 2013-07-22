@@ -200,17 +200,23 @@ sub GetCurrentUser {
 	    ? RT->Config->Get('CommandByMailHeader')
 	    : $RT::CommandByMailHeader;
 
-    # find the content
-    my @content;
-    my @parts = $args{'Message'}->parts_DFS;
-    foreach my $part (@parts) {
-        my $body = $part->bodyhandle or next;
+    my $only_headers = $new_config
+	    ? RT->Config->Get('CommandByMailOnlyHeaders')
+	    : $RT::CommandByMailOnlyHeaders;
 
-        #if it looks like it has pseudoheaders, that's our content
-        if ( $body->as_string =~ /^(?:\S+)(?:{.*})?:/m ) {
-            @content = $body->as_lines;
-            last;
-        }
+    # find the content
+    my @content = ();
+    if (not defined $only_headers or not $only_headers) {
+	    my @parts = $args{'Message'}->parts_DFS;
+	    foreach my $part (@parts) {
+		    my $body = $part->bodyhandle or next;
+
+		    #if it looks like it has pseudoheaders, that's our content
+		    if ( $body->as_string =~ /^(?:\S+)(?:{.*})?:/m ) {
+			    @content = $body->as_lines;
+			    last;
+		    }
+	    }
     }
 
     if (defined $headername) {
