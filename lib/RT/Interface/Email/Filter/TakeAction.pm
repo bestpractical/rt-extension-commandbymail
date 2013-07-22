@@ -200,9 +200,13 @@ sub GetCurrentUser {
         ? RT->Config->Get('CommandByMailHeader')
         : $RT::CommandByMailHeader;
 
+    my $only_headers = $new_config
+        ? RT->Config->Get('CommandByMailOnlyHeaders')
+        : $RT::CommandByMailOnlyHeaders;
+
     # find the content
-    my @content;
-    my @parts = $args{'Message'}->parts_DFS;
+    my @content = ();
+    my @parts = $only_headers ? () : $args{'Message'}->parts_DFS;
     foreach my $part (@parts) {
         my $body = $part->bodyhandle or next;
 
