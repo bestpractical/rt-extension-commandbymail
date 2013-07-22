@@ -52,5 +52,10 @@ There is an optional configuration option CommandByMailGroup
 Set($CommandByMailGroup, group_id);
 You can find the id by browsing to Configuration -> Groups
 
+You can get it to look for commands in headers as well by  setting
+CommandByMailHeader like:
+
+    Set($CommandByMailHeader, "X-RT-Command");
+
 Enjoy.
 
