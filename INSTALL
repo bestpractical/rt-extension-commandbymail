@@ -57,5 +57,10 @@ CommandByMailHeader like:
 
     Set($CommandByMailHeader, "X-RT-Command");
 
+If you only want it to look in headers and not the body, you can set
+CommandByMailOnlyHeaders to a true value, like:
+
+    Set($CommandByMailOnlyHeaders, 1);
+
 Enjoy.
 
