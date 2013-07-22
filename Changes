@@ -1,5 +1,10 @@
 Revision history for RT-Extension-CommandByMail
 
+0.12    Mon Jul 22 11:07:44 PDT 2013
+* Handle setting TxnCFs to 0 (zero)
+* Regression fix for parsing bug in 0.11
+* Look for commands in headers too via $CommandByMailHeader option
+
 0.11
 * get rid of uninit warnings
 * make tests create DBs rather then re-use production
