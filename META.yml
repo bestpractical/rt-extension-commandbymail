@@ -21,10 +21,12 @@ no_index:
   directory:
     - inc
     - t
+  package:
+    - RT::Extension::CommandByMail::Test
 requires:
   MIME::Entity: 5.420
   UNIVERSAL::require: 0
   perl: 5.8.3
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.14
+version: 0.15

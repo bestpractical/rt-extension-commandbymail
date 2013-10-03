@@ -1,5 +1,9 @@
 Revision history for RT-Extension-CommandByMail
 
+0.15    Thu Oct  3 14:49:17 EDT 2013
+* no_index for RT::Extension::CommandByMail::test
+* No code changes since 0.14
+
 0.14    Thu Oct  3 14:16:17 EDT 2013
 * RT 4.2 compatibility
 * Drop support for RT 3.6
