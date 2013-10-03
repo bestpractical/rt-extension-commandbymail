@@ -229,8 +229,9 @@ END
     ok($links, "ticket has links");
     is($links->Count, 1, "one link");
 
-    my $link_type = $obj->LINKTYPEMAP->{ $field }->{'Type'};
-    my $link_mode = $obj->LINKTYPEMAP->{ $field }->{'Mode'};
+    my $typemap = keys %RT::Link::TYPEMAP ? \%RT::Link::TYPEMAP : $obj->LINKTYPEMAP;
+    my $link_type = $typemap->{ $field }->{'Type'};
+    my $link_mode = $typemap->{ $field }->{'Mode'};
 
     my $link = $links->First;
     is($link->Type, $link_type, "correct type");

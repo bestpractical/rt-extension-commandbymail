@@ -387,8 +387,9 @@ sub GetCurrentUser {
             my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
             next unless keys %tmp;
 
-            my $link_type = $ticket_as_user->LINKTYPEMAP->{ $type }->{'Type'};
-            my $link_mode = $ticket_as_user->LINKTYPEMAP->{ $type }->{'Mode'};
+            my $typemap   = keys %RT::Link::TYPEMAP ? \%RT::Link::TYPEMAP : $ticket_as_user->LINKTYPEMAP;
+            my $link_type = $typemap->{$type}->{'Type'};
+            my $link_mode = $typemap->{$type}->{'Mode'};
 
             $tmp{'Default'} = [ do {
                 my %h = ( Base => 'Target', Target => 'Base' );

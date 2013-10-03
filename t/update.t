@@ -236,7 +236,7 @@ END
 }
 
 diag("set links on update") if $ENV{'TEST_VERBOSE'};
-foreach my $field ( qw(DependsOn DependedOnBy RefersTo ReferredToBy Members MemberOf) ) {
+foreach my $field ( qw(DependsOn DependedOnBy RefersTo ReferredToBy MemberOf Members) ) {
     diag("test $field command") if $ENV{'TEST_VERBOSE'};
     my $text = <<END;
 Subject: [$RT::rtname #$test_ticket_id] test
@@ -256,14 +256,16 @@ END
     ok($links, "ticket has links");
     is($links->Count, 1, "one link");
 
-    my $link_type = $obj->LINKTYPEMAP->{ $field }->{'Type'};
-    my $link_mode = $obj->LINKTYPEMAP->{ $field }->{'Mode'};
+    my $typemap = keys %RT::Link::TYPEMAP ? \%RT::Link::TYPEMAP : $obj->LINKTYPEMAP;
+    my $link_type = $typemap->{ $field }->{'Type'};
+    my $link_mode = $typemap->{ $field }->{'Mode'};
 
     my $link = $links->First;
     is($link->Type, $link_type, "correct type");
     isa_ok($link, 'RT::Link');
     my $method = $link_mode .'Obj';
     is($link->$method()->Id, $link_ticket_id, 'set '. $field );
+    ok($obj->DeleteLink(Type => $field, Target => $link_ticket_id));
 }
 
 diag("set custom fields on update") if $ENV{'TEST_VERBOSE'};
