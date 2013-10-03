@@ -1,5 +1,9 @@
 Revision history for RT-Extension-CommandByMail
 
+0.14    Thu Oct  3 14:16:17 EDT 2013
+* RT 4.2 compatibility
+* Drop support for RT 3.6
+
 0.13    Tue Jul 23 16:37:05 PDT 2013
 * Add support for only inspecting headers, not the body
 
