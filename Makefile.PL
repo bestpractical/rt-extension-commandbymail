@@ -28,5 +28,7 @@ substitute(
     qw(lib/RT/Extension/CommandByMail/Test.pm),
 );
 
+no_index package => 'RT::Extension::CommandByMail::Test';
+
 sign;
 WriteAll();
