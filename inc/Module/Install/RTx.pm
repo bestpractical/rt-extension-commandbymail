@@ -174,37 +174,14 @@ install ::
     }
 }
 
-# stolen from RT::Handle so we work on 3.6 (cmp_versions came in with 3.8)
-{ my %word = (
-    a     => -4,
-    alpha => -4,
-    b     => -3,
-    beta  => -3,
-    pre   => -2,
-    rc    => -1,
-    head  => 9999,
-);
-sub cmp_version($$) {
-    my ($a, $b) = (@_);
-    my @a = grep defined, map { /^[0-9]+$/? $_ : /^[a-zA-Z]+$/? $word{$_}|| -10 : undef }
-        split /([^0-9]+)/, $a;
-    my @b = grep defined, map { /^[0-9]+$/? $_ : /^[a-zA-Z]+$/? $word{$_}|| -10 : undef }
-        split /([^0-9]+)/, $b;
-    @a > @b
-        ? push @b, (0) x (@a-@b)
-        : push @a, (0) x (@b-@a);
-    for ( my $i = 0; $i < @a; $i++ ) {
-        return $a[$i] <=> $b[$i] if $a[$i] <=> $b[$i];
-    }
-    return 0;
-}}
 sub requires_rt {
     my ($self,$version) = @_;
 
     # if we're exactly the same version as what we want, silently return
     return if ($version eq $RT::VERSION);
 
-    my @sorted = sort cmp_version $version,$RT::VERSION;
+    require RT::Handle;
+    my @sorted = sort RT::Handle::cmp_version $version,$RT::VERSION;
 
     if ($sorted[-1] eq $version) {
         # should we die?
@@ -216,4 +193,4 @@ sub requires_rt {
 
 __END__
 
-#line 336
+#line 313
