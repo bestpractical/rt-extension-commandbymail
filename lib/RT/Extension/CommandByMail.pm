@@ -23,12 +23,13 @@ RT::Extension::CommandByMail - Change metadata of ticket via email
 =head1 DESCRIPTION
 
 This extension allows you to manage tickets via email interface.  You
-may put commands into beginning of a mail, and extension will apply
+may put commands into the beginning of a mail, and extension will apply
 them. See the list of commands in the
 L<RT::Interface::Email::Filter::TakeAction> docs.
 
 B<CAVEAT:> commands are line oriented, so you can't expand to multiple
-lines for each command, i.e. values can't contains new lines.
+lines for each command, i.e. values can't contains new lines. The module
+also currently expects and parses text, not HTML.
 
 =head1 SECURITY
 
@@ -82,6 +83,17 @@ as well.  For example:
 =head2 C<$CommandByMailOnlyHeaders>
 
 If set, the body will not be examined, only the headers.
+
+=head1 COMMANDS
+
+This extension parses the body and headers of incoming messages
+for list commands. Format of commands is:
+
+    Command: value
+    Command: value
+    ...
+
+See the list of commands in the L<RT::Interface::Email::Filter::TakeAction> docs.
 
 =head1 CAVEATS
 

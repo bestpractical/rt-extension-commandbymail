@@ -4,6 +4,7 @@ use inc::Module::Install;
 RTx ('RT-Extension-CommandByMail');
 author ('Jesse Vincent <jesse@bestpractical.com>');
 license('perl');
+readme_from('lib/RT/Extension/CommandByMail.pm');
 
 build_requires('Test::More');
 build_requires('IPC::Open2');

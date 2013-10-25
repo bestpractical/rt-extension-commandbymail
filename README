@@ -1,103 +1,88 @@
-INSTALLATION
+NAME
+    RT::Extension::CommandByMail - Change metadata of ticket via email
 
-Read INSTALL file to get more info about installation.
+SYNOPSIS
+        Status: stalled
+        Subject: change subject
+        AddAdminCc: boss@example.com
+        AddCc: dev1@example.com
+        AddCc: dev2@example.com
 
-COPYRIGHT AND LICENCE
-
-Copyright (C) 2006, Best Practical Solutions LLC.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+        The comment/reply text goes here
 
 DESCRIPTION
-    This extension parses the body and headers of incoming messages
-    for list commands. Format of commands is:
+    This extension allows you to manage tickets via email interface. You may
+    put commands into the beginning of a mail, and extension will apply
+    them. See the list of commands in the
+    RT::Interface::Email::Filter::TakeAction docs.
+
+    CAVEAT: commands are line oriented, so you can't expand to multiple
+    lines for each command, i.e. values can't contains new lines. The module
+    also currently expects and parses text, not HTML.
+
+SECURITY
+    This extension has no extended auth system; so all security issues that
+    apply to the RT in general also apply to the extension.
+
+INSTALLATION
+    "perl Makefile.PL"
+    "make"
+    "make install"
+        May need root permissions
+
+    Edit your /opt/rt4/etc/RT_SiteConfig.pm
+        Add this line:
+
+            Set(@Plugins, ( @Plugins, "RT::Extension::CommandByMail" ));
+
+        As well as:
+
+            Set(@MailPlugins, qw(Auth::MailFrom Filter::TakeAction));
+
+        If you already have a @MailPlugins configuration line, add
+        "Filter::TakeAction" after any authentication plugins (such as
+        "Auth::MailFrom" or "Auth::Crypt").
+
+    Restart your webserver
+
+CONFIGURATION
+  $CommandByMailGroup
+    You may set a $CommandByMailGroup to a particular group ID in
+    RT_SiteConfig. If set, only members of this group may perform commands
+    by mail.
+
+  $CommandByMailHeader
+    You may set this configuration value to the name of a header to examine
+    as well. For example:
+
+        Set($CommandByMailHeader, "X-RT-Command");
+
+  $CommandByMailOnlyHeaders
+    If set, the body will not be examined, only the headers.
+
+COMMANDS
+    This extension parses the body and headers of incoming messages for list
+    commands. Format of commands is:
 
         Command: value
         Command: value
         ...
 
-    You can find list of "COMMANDS commands below".
+    See the list of commands in the RT::Interface::Email::Filter::TakeAction
+    docs.
 
-    Some commands (like Status, Queue and other) can be used only once.
-    Commands that manage lists can be used multiple times, for example link,
-    custom fields and watchers commands. Also, the latter can be used with
-    "Add" and "Del" prefixes to add/delete values from the current list of
-    the ticket you reply to or comment on.
+CAVEATS
+    This extension is incompatible with "UnsafeEmailCommands" RT option.
 
-  COMMANDS
-   Basic
-    Queue: <name>
-        Set new queue for the ticket
+AUTHOR
+    Jesse Vincent "<jesse@bestpractical.com>" Ruslan U. Zakirov
+    "<ruz@bestpractical.com>" Kevin Falcone "<falcone@bestpractical.com>"
+    Shawn Moore "<sartak@bestpractical.com>"
 
-    Subject: <string>
-        Set new subject to the given string
+LICENCE AND COPYRIGHT
+    Copyright (c) 2006-2013, Best Practical Solutions, LLC. All rights
+    reserved.
 
-    Status: <status>
-        Set new status, one of new, open, stalled, resolved, rejected or
-        deleted
-
-    Owner: <username>
-        Set new owner using the given username
-
-    Priority: <#>
-        Set new priority to the given value
-
-    FinalPriority: <#>
-        Set new final priority to the given value
-
-   Dates
-    Set new date/timestamp, or 0 to unset:
-
-        Due: <new timestamp>
-        Starts: <new timestamp>
-        Started: <new timestamp>
-
-   Time
-    Set new times to the given value in minutes. Note that on
-    correspond/comment "TimeWorked" add time to the current value.
-
-        TimeWorked: <minutes>
-        TimeEstimated: <minutes>
-        TimeLeft: <minutes>
-
-   Watchers
-    Manage watchers: requestors, ccs and admin ccs. This commands can be
-    used several times and/or with "Add" and "Del" prefixes, for example
-    "Requestor" comand set requestor(s) and the current requestors would be
-    deleted, but "AddRequestor" command adds to the current list.
-
-        Requestor: <address> Set requestor(s) using the email address
-        AddRequestor: <address> Add new requestor using the email address
-        DelRequestor: <address> Remove email address as requestor
-        Cc: <address> Set Cc watcher(s) using the email address
-        AddCc: <address> Add new Cc watcher using the email address
-        DelCc: <address> Remove email address as Cc watcher
-        AdminCc: <address> Set AdminCc watcher(s) using the email address
-        AddAdminCc: <address> Add new AdminCc watcher using the email address
-        DelAdminCc: <address> Remove email address as AdminCc watcher
-
-   Links
-    Manage links. These commands are also could be used several times in one
-    message.
-
-        DependsOn: <ticket id>
-        DependedOnBy: <ticket id>
-        RefersTo: <ticket id>
-        ReferredToBy: <ticket id>
-        Members: <ticket id>
-        MemberOf: <ticket id>
-
-   Custom field values
-    Manage custom field values. Could be used multiple times.
-
-        CustomField.{CFName}: <custom field value>
-        AddCustomField.{CFName}: <custom field value>
-        DelCustomField.{CFName}: <custom field value>
-
-    Short forms:
-
-        CF.{CFName}: <custom field value>
-        AddCF.{CFName}: <custom field value>
-        DelCF.{CFName}: <custom field value>
+    This module is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself. See perlartistic.
 
