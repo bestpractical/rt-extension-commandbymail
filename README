@@ -79,6 +79,14 @@ AUTHOR
     "<ruz@bestpractical.com>" Kevin Falcone "<falcone@bestpractical.com>"
     Shawn Moore "<sartak@bestpractical.com>"
 
+BUGS
+    All bugs should be reported via email to
+    bug-RT-Extension-CommandByMail@rt.cpan.org
+    <mailto:bug-RT-Extension-CommandByMail@rt.cpan.org> or via the web at
+    rt.cpan.org
+    <http://rt.cpan.org/Public/Dist/Display.html?Name=RT-Extension-CommandBy
+    Mail>.
+
 LICENCE AND COPYRIGHT
     Copyright (c) 2006-2013, Best Practical Solutions, LLC. All rights
     reserved.

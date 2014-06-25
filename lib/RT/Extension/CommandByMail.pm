@@ -106,6 +106,14 @@ Ruslan U. Zakirov  C<< <ruz@bestpractical.com> >>
 Kevin Falcone C<< <falcone@bestpractical.com> >>
 Shawn Moore C<< <sartak@bestpractical.com> >>
 
+=head1 BUGS
+
+All bugs should be reported via email to
+L<bug-RT-Extension-CommandByMail@rt.cpan.org|mailto:bug-RT-Extension-CommandByMail@rt.cpan.org>
+or via the web at
+L<rt.cpan.org|http://rt.cpan.org/Public/Dist/Display.html?Name=RT-Extension-CommandByMail>.
+
+
 =head1 LICENCE AND COPYRIGHT
 
 Copyright (c) 2006-2013, Best Practical Solutions, LLC.  All rights reserved.
