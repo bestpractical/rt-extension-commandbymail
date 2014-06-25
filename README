@@ -25,9 +25,9 @@ SECURITY
     apply to the RT in general also apply to the extension.
 
 INSTALLATION
-    "perl Makefile.PL"
-    "make"
-    "make install"
+    perl Makefile.PL
+    make
+    make install
         May need root permissions
 
     Edit your /opt/rt4/etc/RT_SiteConfig.pm
@@ -40,8 +40,8 @@ INSTALLATION
             Set(@MailPlugins, qw(Auth::MailFrom Filter::TakeAction));
 
         If you already have a @MailPlugins configuration line, add
-        "Filter::TakeAction" after any authentication plugins (such as
-        "Auth::MailFrom" or "Auth::Crypt").
+        Filter::TakeAction after any authentication plugins (such as
+        Auth::MailFrom or Auth::Crypt).
 
     Restart your webserver
 
@@ -72,23 +72,24 @@ COMMANDS
     docs.
 
 CAVEATS
-    This extension is incompatible with "UnsafeEmailCommands" RT option.
+    This extension is incompatible with UnsafeEmailCommands RT option.
 
 AUTHOR
-    Jesse Vincent "<jesse@bestpractical.com>" Ruslan U. Zakirov
-    "<ruz@bestpractical.com>" Kevin Falcone "<falcone@bestpractical.com>"
-    Shawn Moore "<sartak@bestpractical.com>"
+    Jesse Vincent <jesse@bestpractical.com> Ruslan U. Zakirov
+    <ruz@bestpractical.com> Kevin Falcone <falcone@bestpractical.com> Shawn
+    Moore <sartak@bestpractical.com>
 
 BUGS
     All bugs should be reported via email to
-    bug-RT-Extension-CommandByMail@rt.cpan.org
-    <mailto:bug-RT-Extension-CommandByMail@rt.cpan.org> or via the web at
-    rt.cpan.org
-    <http://rt.cpan.org/Public/Dist/Display.html?Name=RT-Extension-CommandBy
-    Mail>.
+
+        L<bug-RT-Extension-CommandByMail@rt.cpan.org|mailto:bug-RT-Extension-CommandByMail@rt.cpan.org>
+
+    or via the web at
+
+        L<rt.cpan.org|http://rt.cpan.org/Public/Dist/Display.html?Name=RT-Extension-CommandByMail>.
 
 LICENCE AND COPYRIGHT
-    Copyright (c) 2006-2013, Best Practical Solutions, LLC. All rights
+    Copyright (c) 2006-2014, Best Practical Solutions, LLC. All rights
     reserved.
 
     This module is free software; you can redistribute it and/or modify it
