@@ -11,7 +11,7 @@ configure_requires:
   ExtUtils::MakeMaker: 6.59
 distribution_type: module
 dynamic_config: 1
-generated_by: 'Module::Install version 1.06'
+generated_by: 'Module::Install version 1.08'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -20,13 +20,15 @@ name: RT-Extension-CommandByMail
 no_index:
   directory:
     - inc
-    - t
+    - xt
   package:
     - RT::Extension::CommandByMail::Test
 requires:
-  MIME::Entity: 5.420
+  MIME::Entity: '5.420'
   UNIVERSAL::require: 0
   perl: 5.8.3
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.16
+version: '0.16'
+x_module_install_rtx_version: 0.34_03
+x_requires_rt: 4.0.0
