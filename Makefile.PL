@@ -31,5 +31,7 @@ substitute(
 
 no_index package => 'RT::Extension::CommandByMail::Test';
 
+author_tests('xt');
+
 sign;
 WriteAll();
