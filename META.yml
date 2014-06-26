@@ -29,6 +29,6 @@ requires:
   perl: 5.8.3
 resources:
   license: http://dev.perl.org/licenses/
-version: '0.16'
+version: '0.17'
 x_module_install_rtx_version: 0.34_03
 x_requires_rt: 4.0.0

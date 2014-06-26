@@ -1,5 +1,10 @@
 Revision history for RT-Extension-CommandByMail
-0.15    Fri Oct 25 2013
+
+0.17
+* Add the missing BUGS section to the POD
+* Correct other POD formatting nits
+
+0.16    Fri Oct 25 2013
 * Finish updating the README that ships with the extension
 
 0.15    Thu Oct  3 14:49:17 EDT 2013
