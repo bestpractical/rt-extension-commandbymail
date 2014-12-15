@@ -1,86 +1,82 @@
-Revision history for RT-Extension-CommandByMail
+1.00 2014-12-15
+ - Packaging and documentation updates
 
-0.17
-* Add the missing BUGS section to the POD
-* Correct other POD formatting nits
+0.17 2014-06-26
+ - Add the missing BUGS section to the POD
+ - Correct other POD formatting nits
 
-0.16    Fri Oct 25 2013
-* Finish updating the README that ships with the extension
+0.16 2013-10-25
+ - Finish updating the README that ships with the extension
 
-0.15    Thu Oct  3 14:49:17 EDT 2013
-* no_index for RT::Extension::CommandByMail::test
-* No code changes since 0.14
+0.15 2013-10-03
+ - no_index for RT::Extension::CommandByMail::test
+ - No code changes since 0.14
 
-0.14    Thu Oct  3 14:16:17 EDT 2013
-* RT 4.2 compatibility
-* Drop support for RT 3.6
+0.14 2013-10-03
+ - RT 4.2 compatibility
+ - Drop support for RT 3.6
 
-0.13    Tue Jul 23 16:37:05 PDT 2013
-* Add support for only inspecting headers, not the body
+0.13 2013-07-23
+ - Add support for only inspecting headers, not the body
 
-0.12    Mon Jul 22 11:07:44 PDT 2013
-* Handle setting TxnCFs to 0 (zero)
-* Regression fix for parsing bug in 0.11
-* Look for commands in headers too via $CommandByMailHeader option
+0.12 2013-07-22
+ - Handle setting TxnCFs to 0 (zero)
+ - Regression fix for parsing bug in 0.11
+ - Look for commands in headers too via $CommandByMailHeader option
 
-0.11
-* get rid of uninit warnings
-* make tests create DBs rather then re-use production
-* use RT's infrastructure in tests
-* fix reporting for dates changes
-* handle adding watchers when user is not in the DB
-* support Transaction Custom Fields
+0.11 2013-02-07
+ - get rid of uninit warnings
+ - make tests create DBs rather then re-use production
+ - use RT's infrastructure in tests
+ - fix reporting for dates changes
+ - handle adding watchers when user is not in the DB
+ - support Transaction Custom Fields
 
-0.10
-* test fixes for 4.0
-* skip on unloaded current user
-* make it harder to accidentally run tests that will hurt your production database
+0.10 2011-08-03
+ - test fixes for 4.0
+ - skip on unloaded current user
+ - make it harder to accidentally run tests that will hurt your production
+   database
 
-0.09
-* fixup because signature was wrong for 0.08
+0.09 2010-12-14
+ - fixup because signature was wrong for 0.08
 
-0.08
-* Add a note about line breaks
+0.08 2010-12-14
+ - Add a note about line breaks
+ - Loosen up a regex to catch CFs with spaces in their names
+ - Handle non-global CFs more intelligently and avoid a bug where we used
+   the Queue from the mailgate incorrectly
 
-0.08_01
-* Loosen up a regex to catch CFs with spaces in their names
-* Handle non-global CFs more intelligently and avoid a bug
-  where we used the Queue from the mailgate incorrectly
+0.07 2009-07-06
+ - Release changes from dev versions
+ - Add CommandByMailGroup configuration option to  limit who can use
+   commands
+ - packaging screwup release
 
-0.07
-* Release changes from dev versions
+0.06 2008-08-06
+ - upgrade Module::Install::RTx and INSTALL to be more 3.8.x compatible
 
-0.07_02 
-* packaging screwup release
+0.05 2006-09-03
+ - added a patch for 3.6.1 to /really/ include an In-Reply-To header on
+   error mails
+ - attach the original message to the error message
+ - use only the first stanza of pseudo-headers
+ - handle multiple TimeWorked headers on create as well as update
+ - explicitly import ParseCcAddressesFromHead
 
-0.07_01
-* Add CommandByMailGroup configuration option to 
-  limit who can use commands
+0.04 2006-08-22
+ - updated docs for 3.6.1
+ - added a patch to 3.6.1 to include an In-Reply-To header on error mails
+ - ignore multiple leading newlines before the pseudo-header paragraph
+ - made Owner and Add/Del watcher commands accept both e-mail addresses and
+    usernames
+ - handle multiple TimeWorked: headers properly
 
-0.06
-* upgrade Module::Install::RTx and INSTALL to be more 3.8.x compatible
+0.03 2006-08-08
+ - patch for RT-3.6.0
+ - fix setting Owner
+ - report back to the sender if command doesn't exist
 
-0.05
-* added a patch for 3.6.1 to /really/ include an In-Reply-To header on error
-  mails
-* attach the original message to the error message
-* use only the first stanza of pseudo-headers
-* handle multiple TimeWorked headers on create as well as update
-* explicitly import ParseCcAddressesFromHead
-
-0.04
-* updated docs for 3.6.1
-* added a patch to 3.6.1 to include an In-Reply-To header on error mails
-* ignore multiple leading newlines before the pseudo-header paragraph
-* made Owner and Add/Del watcher commands accept both e-mail addresses and 
-  usernames
-* handle multiple TimeWorked: headers properly
-
-0.03
-* patch for RT-3.6.0
-* fix setting Owner
-* report back to the sender if command doesn't exist
-
-0.01 Mon May  8 13:42:24 2006
-* Initial release.
+0.01 2006-05-08
+ - Initial release.
 

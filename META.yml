@@ -1,8 +1,7 @@
 ---
 abstract: 'Change metadata of ticket via email'
 author:
-  - 'Jesse Vincent  C<< <jesse@bestpractical.com> >>'
-  - 'Jesse Vincent  C<< <jesse@bestpractical.com> >>'
+  - 'Best Practical Solutions, LLC <modules@bestpractical.com>'
 build_requires:
   ExtUtils::MakeMaker: 6.59
   IPC::Open2: 0
@@ -11,8 +10,8 @@ configure_requires:
   ExtUtils::MakeMaker: 6.59
 distribution_type: module
 dynamic_config: 1
-generated_by: 'Module::Install version 1.08'
-license: perl
+generated_by: 'Module::Install version 1.12'
+license: gpl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
@@ -24,11 +23,9 @@ no_index:
   package:
     - RT::Extension::CommandByMail::Test
 requires:
-  MIME::Entity: '5.420'
-  UNIVERSAL::require: 0
   perl: 5.8.3
 resources:
-  license: http://dev.perl.org/licenses/
-version: '0.17'
-x_module_install_rtx_version: 0.34_03
+  license: http://opensource.org/licenses/gpl-license.php
+version: '1.00'
+x_module_install_rtx_version: '0.36'
 x_requires_rt: 4.0.0

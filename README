@@ -31,17 +31,22 @@ INSTALLATION
         May need root permissions
 
     Edit your /opt/rt4/etc/RT_SiteConfig.pm
-        Add this line:
+        If you are using RT 4.2 or greater, add this line:
 
-            Set(@Plugins, ( @Plugins, "RT::Extension::CommandByMail" ));
+            Plugin('RT::Extension::CommandByMail');
 
-        As well as:
+        For RT 4.0, add this line:
+
+            Set(@Plugins, qw(RT::Extension::CommandByMail));
+
+        or add RT::Extension::CommandByMail to your existing @Plugins line.
+
+        Regardless of which version of RT, also Filter::TakeAction to your
+        @MailPlugins configuration, as follows:
 
             Set(@MailPlugins, qw(Auth::MailFrom Filter::TakeAction));
 
-        If you already have a @MailPlugins configuration line, add
-        Filter::TakeAction after any authentication plugins (such as
-        Auth::MailFrom or Auth::Crypt).
+        Be sure to include Auth::MailFrom in the list as well.
 
     Restart your webserver
 
@@ -75,9 +80,7 @@ CAVEATS
     This extension is incompatible with UnsafeEmailCommands RT option.
 
 AUTHOR
-    Jesse Vincent <jesse@bestpractical.com> Ruslan U. Zakirov
-    <ruz@bestpractical.com> Kevin Falcone <falcone@bestpractical.com> Shawn
-    Moore <sartak@bestpractical.com>
+    Best Practical Solutions, LLC <modules@bestpractical.com>
 
 BUGS
     All bugs should be reported via email to
@@ -88,10 +91,10 @@ BUGS
 
         L<rt.cpan.org|http://rt.cpan.org/Public/Dist/Display.html?Name=RT-Extension-CommandByMail>.
 
-LICENCE AND COPYRIGHT
-    Copyright (c) 2006-2014, Best Practical Solutions, LLC. All rights
-    reserved.
+LICENSE AND COPYRIGHT
+    This software is Copyright (c) 2014 by Best Practical Solutions
 
-    This module is free software; you can redistribute it and/or modify it
-    under the same terms as Perl itself. See perlartistic.
+    This is free software, licensed under:
+
+      The GNU General Public License, Version 2, June 1991
 
