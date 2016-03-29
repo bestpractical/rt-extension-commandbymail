@@ -1,4 +1,5 @@
 Changes
+etc/handle_action_pass_currentuser.patch
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AuthorTests.pm
@@ -15,10 +16,10 @@ inc/Module/Install/RTx/Runtime.pm
 inc/Module/Install/Substitute.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
-inc/unicore/Name.pm
 inc/YAML/Tiny.pm
 lib/RT/Extension/CommandByMail.pm
-lib/RT/Extension/CommandByMail/Test.pm
+lib/RT/Extension/CommandByMail/Test.pm.in
+lib/RT/Interface/Email/Action/CommandByMail.pm
 lib/RT/Interface/Email/Filter/TakeAction.pm
 Makefile.PL
 MANIFEST			This list of files
