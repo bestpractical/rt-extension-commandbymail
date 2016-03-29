@@ -18,6 +18,9 @@ substitute(
         RT_BIN_PATH  => $bin_path,
         RT_SBIN_PATH => $sbin_path,
     },
+    {
+        sufix => '.in'
+    },
     qw(lib/RT/Extension/CommandByMail/Test.pm),
 );
 
