@@ -57,7 +57,23 @@ C<@MailPlugins> configuration, as follows:
 
     Set(@MailPlugins, qw(Auth::MailFrom Filter::TakeAction));
 
+For RT 4.4 or newer, the plugin code is in C<Action::CommandByMail>, so
+add this:
+
+    Set(@MailPlugins, qw(Auth::MailFrom Action::CommandByMail));
+
 Be sure to include C<Auth::MailFrom> in the list as well.
+
+B<Note:> The plugin name has changed for RT 4.4, so after upgrading you
+must also update your C<RT_SiteConfig.pm> file to change
+C<Filter::TakeAction> to the new C<Action::CommandByMail>.
+
+=item Patch RT
+
+For RT 4.4.0, apply the included patch:
+
+    cd /opt/rt4  # Your location may be different
+    patch -p1 < /download/dir/RT-Extension-CommandByMail/etc/handle_action_pass_currentuser.patch
 
 =item Restart your webserver
 
@@ -225,6 +241,14 @@ If set, the body will not be examined, only the headers.
 
 This extension is incompatible with C<UnsafeEmailCommands> RT option.
 
+=head1 METHODS
+
+=head2 ProcessCommands
+
+This method provides the main email processing functionality. It supports
+both RT 4.2 and earlier and 4.4 and later. To do this, the return hashes
+contain some values used by 4.2 code and some used by 4.4. The return
+values coexist and unused values are ignored by the different versions.
 =cut
 
 sub ProcessCommands {
@@ -245,11 +269,19 @@ sub ProcessCommands {
             ."CurrentUser (actor) is not authorized. "
         );
         return { CurrentUser => $args{'CurrentUser'},
-                 AuthLevel   => $args{'AuthLevel'} };
+                 AuthLevel   => $args{'AuthLevel'},
+                 MailError   => 1,
+                 ErrorSubject     => "Permission Denied",
+                 Explanation => "CurrentUser is not set when trying to "
+                 . "process email command via CommandByMail",
+                 Failure     => 1
+             };
     }
 
+    $RT::Logger->debug("Running CommandByMail as ".$args{'CurrentUser'}->UserObj->Name);
+
     # If the user isn't asking for a comment or a correspond,
-    # bail out
+    # bail out. Only relevant for pre-4.2.
     unless ( $args{'Action'} =~ /^(?:comment|correspond)$/i ) {
         return { CurrentUser => $args{'CurrentUser'},
                  AuthLevel   => $args{'AuthLevel'} };
@@ -269,11 +301,15 @@ sub ProcessCommands {
         if (!$group->HasMemberRecursively($args{'CurrentUser'}->PrincipalObj)) {
             $RT::Logger->debug("CurrentUser not in CommandByMailGroup");
             return { CurrentUser => $args{'CurrentUser'},
-                     AuthLevel   => $args{'AuthLevel'} };
+                     AuthLevel   => $args{'AuthLevel'},
+                     MailError   => 1,
+                     ErrorSubject     => "Permission Denied",
+                     Explanation => "User " . $args{'CurrentUser'}->UserObj->EmailAddress
+                     . " is not in the configured CommandByMailGroup",
+                     Failure     => 1
+                 };
         }
     }
-
-    $RT::Logger->debug("Running CommandByMail as ".$args{'CurrentUser'}->UserObj->Name);
 
     my $headername = $new_config
         ? RT->Config->Get('CommandByMailHeader')
@@ -459,7 +495,13 @@ sub ProcessCommands {
                     "Couldn't write $args{'Action'}."
                     ." Fallback to standard mailgate. Error: $msg");
                 return { CurrentUser => $args{'CurrentUser'},
-                         AuthLevel   => $args{'AuthLevel'} };
+                         AuthLevel   => $args{'AuthLevel'},
+                         MailError   => 1,
+                         ErrorSubject     => "Unable to execute $args{'Action'}",
+                         Explanation => "Unable to execute $args{'Action'} on ticket "
+                         . $args{'Ticket'}->Id . ": $msg",
+                         Failure     => 1
+                     };
             }
         }
 
@@ -851,7 +893,6 @@ sub _ReportResults {
     );
     return;
 }
-
 
 
 1;
