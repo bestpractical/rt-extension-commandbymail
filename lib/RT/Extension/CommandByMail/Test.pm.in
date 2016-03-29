@@ -25,4 +25,28 @@ sub import {
     require RT::Extension::CommandByMail;
 }
 
+sub bootstrap_more_config{
+    my $self = shift;
+    my $config = shift;
+    my $args_ref = shift;
+
+    if ( RT_at_or_newer_than('4.4.0') ){
+        print $config "Set( \@MailPlugins, qw(Auth::MailFrom Action::CommandByMail));\n";
+    }
+    else{
+        print $config "Set( \@MailPlugins, qw(Auth::MailFrom Filter::TakeAction));\n";
+    }
+    return;
+}
+
+sub RT_at_or_newer_than{
+    my $version = shift;
+    my ($my_major, $my_minor, $my_sub) = split(/\./, $version);
+    my ($major, $minor, $sub) = split(/\./, $RT::VERSION);
+    return ($my_major >= $major
+            and $my_minor >= $minor
+            and $my_sub >= $sub)
+            ? 1 : 0;
+}
+
 1;

@@ -3,7 +3,6 @@ use warnings;
 
 use RT::Extension::CommandByMail::Test tests => undef;
 my $test = 'RT::Extension::CommandByMail::Test';
-RT->Config->Set('MailPlugins', 'Auth::MailFrom', 'Filter::TakeAction');
 
 my $cf_name = 'Test CF';
 {
