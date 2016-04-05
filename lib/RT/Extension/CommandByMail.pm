@@ -102,7 +102,7 @@ list commands. Format of commands is:
     Command: value
     ...
 
-You can find list of L</COMMANDS commands below>.
+You can find list of L</COMMANDS> below.
 
 Some commands (like Status, Queue and other) can be used only once. Commands
 that manage lists can be used multiple times, for example link, custom fields
