@@ -1,5 +1,7 @@
 2.00 2016-03-29
  - Refactor to add support for RT 4.4
+ - Update docs to clarify header handling
+ - Update perl minimum version to 5.10.1
 
 1.00 2014-12-15
  - Packaging and documentation updates
