@@ -24,7 +24,7 @@ no_index:
   package:
     - RT::Extension::CommandByMail::Test
 requires:
-  perl: 5.8.3
+  perl: 5.10.1
 resources:
   license: http://opensource.org/licenses/gpl-license.php
 version: '2.00'

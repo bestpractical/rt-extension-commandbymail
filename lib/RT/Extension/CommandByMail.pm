@@ -1,4 +1,4 @@
-use 5.008003;
+use 5.10.1;
 package RT::Extension::CommandByMail;
 
 use RT::Interface::Email qw(ParseCcAddressesFromHead);
