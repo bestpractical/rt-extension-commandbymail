@@ -83,9 +83,35 @@ For RT 4.4.0, apply the included patch:
 
 =back
 
+=head1 CONFIGURATION
+
+In addition to adding the configuration above to activate the extension in
+RT, the following options are available.
+
+=head2 C<$CommandByMailGroup>
+
+You may set a C<$CommandByMailGroup> to a particular group ID in RT_SiteConfig.
+If set, only members of this group may perform commands by mail.
+
+=head2 C<$CommandByMailHeader>
+
+You may set this configuration value to the name of a header to examine
+as well.  For example:
+
+    Set($CommandByMailHeader, "X-RT-Command");
+
+=head2 C<$CommandByMailOnlyHeaders>
+
+If set, the body will not be examined, only the header defined by the previous
+configuration option.
+
+=head1 CAVEATS
+
+This extension is incompatible with C<UnsafeEmailCommands> RT option.
+
 =head1 DESCRIPTION
 
-This extension allows you to manage tickets via email interface.  You
+This extension allows you to manage ticket metadata via email.  You
 may put commands into the beginning of an email, and the extension will apply
 them. The list of commands is detailed below.
 
@@ -95,8 +121,8 @@ also currently expects and parses text, not HTML.
 
 =head2 FORMAT
 
-This extension parses the body and headers of incoming messages for
-list commands. Format of commands is:
+This extension parses the body, and optionally a header, in incoming messages
+for commands to update ticket metadata. The format of commands is:
 
     Command: value
     Command: value
@@ -222,28 +248,6 @@ Short forms:
 
 This extension has no extended auth system; so all security issues that
 apply to the RT in general also apply to the extension.
-
-=head1 CONFIGURATION
-
-=head2 C<$CommandByMailGroup>
-
-You may set a C<$CommandByMailGroup> to a particular group ID in RT_SiteConfig.
-If set, only members of this group may perform commands by mail.
-
-=head2 C<$CommandByMailHeader>
-
-You may set this configuration value to the name of a header to examine
-as well.  For example:
-
-    Set($CommandByMailHeader, "X-RT-Command");
-
-=head2 C<$CommandByMailOnlyHeaders>
-
-If set, the body will not be examined, only the headers.
-
-=head1 CAVEATS
-
-This extension is incompatible with C<UnsafeEmailCommands> RT option.
 
 =head1 METHODS
 
