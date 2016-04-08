@@ -12,3 +12,4 @@ pod2htm*.tmp
 /MYMETA.*
 /t/tmp
 /xt/tmp
+/lib/RT/Extension/CommandByMail/Test.pm
