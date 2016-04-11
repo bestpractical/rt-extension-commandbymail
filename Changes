@@ -1,3 +1,7 @@
+2.01 2016-04-11
+ - Recreate ParseCcAddressesFromHead to support create with
+   ParseNewMessageForTicketCcs set
+
 2.00 2016-03-29
  - Refactor to add support for RT 4.4
  - Update docs to clarify header handling
