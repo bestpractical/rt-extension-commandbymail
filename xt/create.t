@@ -362,4 +362,21 @@ END
 
 }
 
+RT::Config->Set('ParseNewMessageForTicketCcs', 1);
+diag("test with ParseNewMessageForTicketCcs set") if $ENV{'TEST_VERBOSE'};
+{
+    my $text = <<END;
+Subject: test
+From: root\@localhost
+
+test
+END
+    my (undef, $id) = $test->send_via_mailgate( $text );
+    ok($id, "created ticket");
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    $test_ticket_id = $id;
+}
+
 done_testing();
