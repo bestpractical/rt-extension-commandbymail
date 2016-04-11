@@ -1,7 +1,8 @@
 use 5.10.1;
 package RT::Extension::CommandByMail;
 
-use RT::Interface::Email qw(ParseCcAddressesFromHead);
+use RT::EmailParser;
+use Email::Address;
 
 our @REGULAR_ATTRIBUTES = qw(Queue Owner Subject Status Priority FinalPriority);
 our @TIME_ATTRIBUTES    = qw(TimeWorked TimeLeft TimeEstimated);
@@ -902,6 +903,37 @@ sub _ReportResults {
     return;
 }
 
+=head2 ParseCcAddressesFromHead HASH
+
+Takes a hash containing QueueObj, Head and CurrentUser objects.
+Returns a list of all email addresses in the To and Cc
+headers b<except> the current Queue's email addresses, the CurrentUser's
+email address and anything that the configuration sub RT::IsRTAddress matches.
+
+=cut
+
+# Originally part of RT, this function was refactored into core 'create'
+# functionality in 4.4 via 5ccf5a14f. It's still useful in the logic flow
+# here, so reproduce the old function.
+
+sub ParseCcAddressesFromHead {
+    my %args = (
+        Head        => undef,
+        QueueObj    => undef,
+        CurrentUser => undef,
+        @_
+    );
+
+    my $current_address = lc $args{'CurrentUser'}->EmailAddress;
+    my $user = $args{'CurrentUser'}->UserObj;
+
+    return
+        grep $_ ne $current_address && !RT::EmailParser->IsRTAddress( $_ ),
+        map lc $user->CanonicalizeEmailAddress( $_->address ),
+        map RT::EmailParser->CleanupAddresses( Email::Address->parse(
+              Encode::decode( "UTF-8", $args{'Head'}->get( $_ ) ) ) ),
+        qw(To Cc);
+}
 
 1;
 __END__

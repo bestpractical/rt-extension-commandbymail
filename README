@@ -205,6 +205,12 @@ METHODS
     The return values coexist and unused values are ignored by the different
     versions.
 
+  ParseCcAddressesFromHead HASH
+    Takes a hash containing QueueObj, Head and CurrentUser objects. Returns
+    a list of all email addresses in the To and Cc headers b<except> the
+    current Queue's email addresses, the CurrentUser's email address and
+    anything that the configuration sub RT::IsRTAddress matches.
+
 AUTHOR
     Best Practical Solutions, LLC <modules@bestpractical.com>
 
