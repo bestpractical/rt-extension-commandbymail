@@ -852,8 +852,8 @@ sub _CanonicalizeCommand {
 
 sub _CheckCommand {
     my ($cmd, $val) = (lc shift, shift);
-    return 1 if $cmd =~ /^(add|del|)customfield{.*}$/i;
-    return 1 if $cmd =~ /^transactioncustomfield{.*}$/i;
+    return 1 if $cmd =~ /^(add|del|)customfield\{.*\}$/i;
+    return 1 if $cmd =~ /^transactioncustomfield\{.*\}$/i;
     if ( grep $cmd eq lc $_, @REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES, @DATE_ATTRIBUTES ) {
         return 1 unless ref $val;
         return (0, "Command '$cmd' doesn't support multiple values");
