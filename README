@@ -205,6 +205,11 @@ METHODS
     The return values coexist and unused values are ignored by the different
     versions.
 
+    For 4.4, returning { DeferToRT => 1 } invokes the normal RT mail
+    processing flow. This allows CommandByMail to pass on processing an
+    email message for cases like a user not being a member of
+    CommandByMailGroup.
+
   ParseCcAddressesFromHead HASH
     Takes a hash containing QueueObj, Head and CurrentUser objects. Returns
     a list of all email addresses in the To and Cc headers b<except> the

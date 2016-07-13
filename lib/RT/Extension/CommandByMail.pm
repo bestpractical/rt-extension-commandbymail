@@ -258,6 +258,11 @@ This method provides the main email processing functionality. It supports
 both RT 4.2 and earlier and 4.4 and later. To do this, the return hashes
 contain some values used by 4.2 code and some used by 4.4. The return
 values coexist and unused values are ignored by the different versions.
+
+For 4.4, returning C<{ DeferToRT =E<gt> 1 }> invokes the normal RT mail processing
+flow. This allows CommandByMail to pass on processing an email message for
+cases like a user not being a member of C<CommandByMailGroup>.
+
 =cut
 
 sub ProcessCommands {
@@ -308,15 +313,13 @@ sub ProcessCommands {
         $group->Load($group_id);
 
         if (!$group->HasMemberRecursively($args{'CurrentUser'}->PrincipalObj)) {
+
             $RT::Logger->debug("CurrentUser not in CommandByMailGroup");
-            return { CurrentUser => $args{'CurrentUser'},
-                     AuthLevel   => $args{'AuthLevel'},
-                     MailError   => 1,
-                     ErrorSubject     => "Permission Denied",
-                     Explanation => "User " . $args{'CurrentUser'}->UserObj->EmailAddress
-                     . " is not in the configured CommandByMailGroup",
-                     Failure     => 1
-                 };
+
+            # User has no access to process commands, so defer to RT to process
+            # like a normal email response.
+
+            return { DeferToRT => 1 };
         }
     }
 

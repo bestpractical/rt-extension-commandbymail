@@ -23,14 +23,20 @@ handlers provided by RT.
 # pattern from RT's default action handling for providing both.
 
 sub HandleComment {
-    _HandleEither( @_, Action => "Comment" );
+    CBMHandleEither( @_, Action => "Comment" );
 }
 
 sub HandleCorrespond {
-    _HandleEither( @_, Action => "Correspond" );
+    CBMHandleEither( @_, Action => "Correspond" );
 }
 
-sub _HandleEither {
+=head2 CBMHandleEither
+
+This method is the CommandByMail version of RT's _HandleEither.
+
+=cut
+
+sub CBMHandleEither {
     my %args = (
         Action      => undef,
         Message     => undef,
@@ -43,6 +49,12 @@ sub _HandleEither {
 
     my $return_ref = RT::Extension::CommandByMail::ProcessCommands(%args);
 
+    if ( exists $return_ref->{'DeferToRT'} and $return_ref->{'DeferToRT'} ){
+        # Let RT process like normal email.
+        # Action and other params should already be set appropriately.
+        return RT::Interface::Email::Action::Defaults::_HandleEither( %args );
+    }
+
     if ( exists $return_ref->{'MailError'} and $return_ref->{'MailError'} ){
         MailError(
             Subject     => $return_ref->{'ErrorSubject'},
@@ -50,6 +62,7 @@ sub _HandleEither {
             FAILURE     => $return_ref->{'Failure'},
         );
     }
+
     return;
 }
 
