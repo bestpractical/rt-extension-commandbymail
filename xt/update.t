@@ -314,4 +314,29 @@ END
     like($content, qr/Priority: 44/, "invalid Priority command not stripped");
 }
 
+diag("check CommandByMail group") if $ENV{'TEST_VERBOSE'};
+{
+    ok (my $group = RT::Group->new(RT->SystemUser), "instantiated a group object");
+    ok (my ($gid, $gmsg) = $group->CreateUserDefinedGroup( Name => 'TestGroup', Description => 'A test group',
+                        ), 'Created a new group');
+    RT::Config->Set( CommandByMailGroup => $gid );
+    my $text = <<END;
+Subject: [$RT::rtname #$test_ticket_id] test
+From: root\@localhost
+
+Priority: 44
+
+test
+END
+    my (undef, $id) = $test->send_via_mailgate( $text );
+    is($id, $test_ticket_id, "updated ticket");
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    is($obj->Priority, 20, "not updated, user not in CommandByMail group");
+
+    my $content = $obj->Transactions->Last->Content;
+    like($content, qr/Priority: 44/, "text processed as normal email text");
+}
+
 done_testing();
