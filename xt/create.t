@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use utf8;
 
 use RT::Extension::CommandByMail::Test tests => undef;
 my $test = 'RT::Extension::CommandByMail::Test';
@@ -20,6 +21,22 @@ END
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
     $test_ticket_id = $id;
+}
+
+diag("test with umlaut in subject") if $ENV{'TEST_VERBOSE'};
+{
+    my $text = <<END;
+Subject: test Brontë
+From: root\@localhost
+
+test
+END
+    my (undef, $id) = $test->send_via_mailgate( $text );
+    ok($id, "created ticket");
+    my $obj = RT::Ticket->new( $RT::SystemUser );
+    $obj->Load( $id );
+    is($obj->id, $id, "loaded ticket");
+    is($obj->Subject, "test Brontë", "got correct subject with umlauts");
 }
 
 # XXX: use statuses from config/libs
