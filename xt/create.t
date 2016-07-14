@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-use utf8;
 
 use RT::Extension::CommandByMail::Test tests => undef;
 my $test = 'RT::Extension::CommandByMail::Test';
@@ -36,7 +35,7 @@ END
     my $obj = RT::Ticket->new( $RT::SystemUser );
     $obj->Load( $id );
     is($obj->id, $id, "loaded ticket");
-    is($obj->Subject, "test Brontë", "got correct subject with umlauts");
+    is($obj->Subject, Encode::decode("UTF-8","test Brontë"), "got correct subject with umlauts");
 }
 
 # XXX: use statuses from config/libs
