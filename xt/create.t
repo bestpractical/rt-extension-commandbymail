@@ -26,7 +26,7 @@ END
 diag("test with umlaut in subject") if $ENV{'TEST_VERBOSE'};
 {
     my $text = <<END;
-Subject: test Brontë
+Subject: test =?UTF-8?B?QnJvbnTDqw==?=
 From: root\@localhost
 
 test
