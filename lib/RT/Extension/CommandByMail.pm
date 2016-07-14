@@ -345,7 +345,8 @@ sub ProcessCommands {
     }
 
     if (defined $headername) {
-        unshift @content, $args{'Message'}->head->get_all($headername);
+        unshift @content, map {Encode::decode("UTF-8",$_)}
+            $args{'Message'}->head->get_all($headername);
     }
 
     my @items;
@@ -683,6 +684,7 @@ sub ProcessCommands {
         # subject
         unless ( $create_args{'Subject'} ) {
             $create_args{'Subject'} = $args{'Message'}->head->get('Subject');
+            $create_args{'Subject'} = Encode::decode("UTF-8", $create_args{'Subject'});
             chomp $create_args{'Subject'};
         }
 
