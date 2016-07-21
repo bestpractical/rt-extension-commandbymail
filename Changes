@@ -1,3 +1,7 @@
+2.02 2016-07-13
+ - Allow email through for normal processing when CommandByMailGroup
+   is set and the From: user is not in the group. Fixes #114132
+
 2.01 2016-04-11
  - Recreate ParseCcAddressesFromHead to support create with
    ParseNewMessageForTicketCcs set
