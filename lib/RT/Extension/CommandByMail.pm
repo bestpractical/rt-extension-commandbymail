@@ -11,7 +11,7 @@ our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
             HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
 our @WATCHER_ATTRIBUTES = qw(Requestor Cc AdminCc);
 
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 
 =head1 NAME
 

@@ -1,9 +1,11 @@
 use inc::Module::Install;
 
 RTx ('RT-Extension-CommandByMail');
-
+no_index package => "RT::Extension::CommandByMail::Test";
 build_requires('Test::More');
 build_requires('IPC::Open2');
+
+repository('https://github.com/bestpractical/rt-extension-commandbymail');
 
 auto_install();
 

@@ -23,10 +23,12 @@ no_index:
     - xt
   package:
     - RT::Extension::CommandByMail::Test
+    - RT::Extension::CommandByMail::Test
 requires:
   perl: 5.10.1
 resources:
   license: http://opensource.org/licenses/gpl-license.php
-version: '2.02'
+  repository: https://github.com/bestpractical/rt-extension-commandbymail
+version: '2.03'
 x_module_install_rtx_version: '0.37'
 x_requires_rt: 4.0.0

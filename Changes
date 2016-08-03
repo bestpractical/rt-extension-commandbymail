@@ -1,3 +1,8 @@
+2.03 2016-08-03
+ - Explicitly decode all values extracted from MIME headers to align
+   with RT's handling. This allows for proper handling of characters
+   like umlauts in subjects. Fixes #115654. Thanks to Alex Vandiver.
+
 2.02 2016-07-13
  - Allow email through for normal processing when CommandByMailGroup
    is set and the From: user is not in the group. Fixes #114132
