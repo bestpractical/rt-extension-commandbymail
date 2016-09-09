@@ -11,7 +11,7 @@ our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
             HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
 our @WATCHER_ATTRIBUTES = qw(Requestor Cc AdminCc);
 
-our $VERSION = '2.03';
+our $VERSION = '3.00';
 
 =head1 NAME
 
@@ -32,6 +32,14 @@ Works with RT 4.0, 4.2, 4.4
     AddCc: dev2@example.com
 
     The comment/reply text goes here
+
+=head1 IMPORTANT
+
+For users of versions of this extension prior to 3.0: Please note that now you
+will not receive an unknown command error email for unknown commands. There
+will be a warning in the logs whenever an unknown command is encountered. A
+setting was added to restore the previous behavior. See the setting
+C<$CommandByMailErrorOnUnknown> under "Configuration" for more information.
 
 =head1 INSTALLATION
 
@@ -105,6 +113,12 @@ as well.  For example:
 
 If set, the body will not be examined, only the header defined by the previous
 configuration option.
+
+=head2 C<$CommandByMailErrorOnUnknown>
+
+Prior to 2.02, this extension throws an error if it finds an unknown command.
+This is no longer the case. Setting this option will restore that legacy
+behavior.
 
 =head1 CAVEATS
 
@@ -380,6 +394,11 @@ sub ProcessCommands {
 
     foreach my $cmd ( keys %cmds ) {
         my ($val, $msg) = _CheckCommand( $cmd );
+        if ($val == 2) {
+            delete $cmds{$cmd};
+            warn "Skipping unknown command '$cmd'";
+            next;
+        }
         unless ( $val ) {
             $results{ $cmd } = {
                 value   => delete $cmds{ $cmd },
@@ -872,6 +891,7 @@ sub _CheckCommand {
         return 1 if grep $cmd eq lc $_, @LINK_ATTRIBUTES, @WATCHER_ATTRIBUTES;
     }
 
+    return 2 unless RT->Config->Get('CommandByMailErrorOnUnknown');
     return (0, "Command '$cmd' is unknown");
 }
 

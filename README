@@ -15,6 +15,14 @@ SYNOPSIS
 
         The comment/reply text goes here
 
+IMPORTANT
+    For users of versions of this extension prior to 3.0: Please note that
+    now you will not receive an unknown command error email for unknown
+    commands. There will be a warning in the logs whenever an unknown
+    command is encountered. A setting was added to restore the previous
+    behavior. See the setting $CommandByMailErrorOnUnknown under
+    "Configuration" for more information.
+
 INSTALLATION
     perl Makefile.PL
     make
@@ -74,6 +82,11 @@ CONFIGURATION
   $CommandByMailOnlyHeaders
     If set, the body will not be examined, only the header defined by the
     previous configuration option.
+
+  $CommandByMailErrorOnUnknown
+    Prior to 2.02, this extension throws an error if it finds an unknown
+    command. This is no longer the case. Setting this option will restore
+    that legacy behavior.
 
 CAVEATS
     This extension is incompatible with UnsafeEmailCommands RT option.
