@@ -1,4 +1,4 @@
-3.00 2016-09-08
+3.00 2016-09-09
  - Change default behavior for unknown commands: Unknown commands no longer
    generate an unknown command email. There will be a warning in the logs
    whenever an ignored command is encountered.

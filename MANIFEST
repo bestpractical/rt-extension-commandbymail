@@ -18,6 +18,7 @@ inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 inc/YAML/Tiny.pm
 lib/RT/Extension/CommandByMail.pm
+lib/RT/Extension/CommandByMail/Test.pm
 lib/RT/Extension/CommandByMail/Test.pm.in
 lib/RT/Interface/Email/Action/CommandByMail.pm
 lib/RT/Interface/Email/Filter/TakeAction.pm
@@ -27,5 +28,6 @@ META.yml
 README
 xt/create.t
 xt/internals.t
+xt/tmp/ports
 xt/txn-cfs.t
 xt/update.t
