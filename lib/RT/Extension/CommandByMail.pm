@@ -353,7 +353,7 @@ sub ProcessCommands {
 
 	# Only check text attachments for commands
 	my $content_type = $part->head->get('content-type', 0);
-	next unless $head_type =~ 'text';
+	next unless $head_type =~ '^\s*text/';
 
         #if it looks like it has pseudoheaders, that's our content
         if ( $body->as_string =~ /^(?:\S+)(?:{.*})?:/m ) {
