@@ -351,6 +351,10 @@ sub ProcessCommands {
     foreach my $part (@parts) {
         my $body = $part->bodyhandle or next;
 
+	# Only check text attachments for commands
+	my $content_type = $part->head->get('content-type', 0);
+	next unless $head_type =~ 'text';
+
         #if it looks like it has pseudoheaders, that's our content
         if ( $body->as_string =~ /^(?:\S+)(?:{.*})?:/m ) {
             @content = $body->as_lines;
