@@ -114,6 +114,11 @@ as well.  For example:
 If set, the body will not be examined, only the header defined by the previous
 configuration option.
 
+=head2 C<$CommandByMailStripOut>
+
+If set, the commands - if any - will be removed from the body of the email, and
+will not be part of the recorded correspondence.
+
 =head2 C<$CommandByMailErrorOnUnknown>
 
 Prior to 2.02, this extension throws an error if it finds an unknown command.
@@ -347,9 +352,10 @@ sub ProcessCommands {
 
     # find the content
     my @content = ();
+    my $body;
     my @parts = $only_headers ? () : $args{'Message'}->parts_DFS;
     foreach my $part (@parts) {
-        my $body = $part->bodyhandle or next;
+        $body = $part->bodyhandle or next;
 
         #if it looks like it has pseudoheaders, that's our content
         if ( $body->as_string =~ /^(?:\S+)(?:{.*})?:/m ) {
@@ -388,6 +394,23 @@ sub ProcessCommands {
         } else {
             $cmds{$key} = $val;
         }
+    }
+
+    # Strip out commands from content if configuration says so
+    if (RT->Config->Get('CommandByMailStripOut')) {
+        my @content = $body->as_lines;
+        my $io = $body->open("w") or die "Cannot open body";
+
+        my $body_top = 1;
+        foreach my $line (@content) {
+            # Strip out commands only at the top
+            next if ($body_top && $line =~ /^(?:(\S+)\s*?:\s*?(.*)\s*?|)$/);
+            $body_top = 0;
+
+            $io->print($line);
+        }
+
+        $io->close() or die "Cannot close body";
     }
 
     my %results;
@@ -445,7 +468,7 @@ sub ProcessCommands {
 
         # we want the queue the ticket is currently in, not the queue
         # that was passed to rt-mailgate, otherwise we can't find the
-        # proper set of Custom Fields.  But, we have to do this after 
+        # proper set of Custom Fields.  But, we have to do this after
         # we potentially update the Queue from @REGULAR_ATTRIBUTES
         $queue = $ticket_as_user->QueueObj();
 
@@ -508,7 +531,7 @@ sub ProcessCommands {
         {
             my $time_taken = 0;
             if (grep $_ eq 'TimeWorked', @TIME_ATTRIBUTES) {
-                if (ref $cmds{'timeworked'}) { 
+                if (ref $cmds{'timeworked'}) {
                     map { $time_taken += ($_ || 0) }  @{ $cmds{'timeworked'} };
                     $RT::Logger->debug("Time taken: $time_taken");
                 }
@@ -668,7 +691,7 @@ sub ProcessCommands {
 
         # Canonicalize links
         foreach my $type ( @LINK_ATTRIBUTES ) {
-            $create_args{ $type } = [ _CompileAdditiveForCreate( 
+            $create_args{ $type } = [ _CompileAdditiveForCreate(
                 _ParseAdditiveCommand( \%cmds, 0, $type ),
             ) ];
         }
@@ -986,4 +1009,3 @@ This is free software, licensed under:
   The GNU General Public License, Version 2, June 1991
 
 =cut
-
