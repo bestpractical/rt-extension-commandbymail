@@ -11,7 +11,7 @@ our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
             HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
 our @WATCHER_ATTRIBUTES = qw(Requestor Cc AdminCc);
 
-our $VERSION = '3.00';
+our $VERSION = '3.01';
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ RT::Extension::CommandByMail - Change ticket metadata via email
 
 =head1 RT VERSION
 
-Works with RT 4.0, 4.2, 4.4
+Works with RT 4.2, 4.4, 5.0
 
 =head1 SYNOPSIS
 
