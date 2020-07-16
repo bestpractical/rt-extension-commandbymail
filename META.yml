@@ -29,6 +29,6 @@ requires:
 resources:
   license: http://opensource.org/licenses/gpl-license.php
   repository: https://github.com/bestpractical/rt-extension-commandbymail
-version: '3.00'
+version: '3.01'
 x_module_install_rtx_version: '0.42'
 x_requires_rt: 4.0.0
