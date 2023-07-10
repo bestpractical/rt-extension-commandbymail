@@ -367,7 +367,7 @@ sub ProcessCommands {
     my $found_pseudoheaders = 0;
     foreach my $line (@content) {
         next if $line =~ /^\s*$/ && ! $found_pseudoheaders;
-        last if $line !~ /^(?:(\S+(?:{.*})?)\s*?:\s*?(.*)\s*?|)$/;
+        last if $line !~ /^(?:(\S+(?:{.*})?)\s*:\s*(.*)\s*|)$/;
         last if not defined $1 and $found_pseudoheaders;
         next if not defined $1;
 
