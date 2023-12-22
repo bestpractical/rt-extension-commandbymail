@@ -486,23 +486,66 @@ sub ProcessCommands {
             $results{ $attribute }->{value} = $cmds{ lc $attribute };
         }
 
+
+        # Parses core WATCHERS and Custom Roles related commands
+        # First, add custom roles from this queue to the list of
+        # attributes we are going to parse
+        $custom_roles->LimitToObjectId( $queue->id );
+        my %custom_role_grouptype_to_name;
+        while ( my $custom_role = $custom_roles->Next ) {
+            $custom_role_grouptype_to_name{ $custom_role->GroupType }
+                = $custom_role->Name;
+            push @WATCHER_ATTRIBUTES, $custom_role->GroupType;
+        }
+        # Then, parse the commands
         foreach my $type ( @WATCHER_ATTRIBUTES ) {
-            my %tmp = _ParseAdditiveCommand( \%cmds, 1, $type );
+            my $command_suffix = $type;
+            $command_suffix = "CustomRole{". $custom_role_grouptype_to_name{ $type } ."}"
+                if $type =~ /^RT::CustomRole-/;
+            my %tmp = _ParseAdditiveCommand( \%cmds, 1, $command_suffix );
             next unless keys %tmp;
 
-            $tmp{'Default'} = [ do {
-                my $method = $type;
-                $method .= 's' if $type eq 'Requestor';
-                $args{'Ticket'}->$method->MemberEmailAddresses;
-            } ];
+            # Convert values to ID so we can better compare with the existing
+            # values when we are updating
+            # %tmp can be originally something like
+            #   ( 'Add' => [ 'user1@example.com', 'group:group1', 'nonexistantuser@example.com' ] )
+            # after _ParseAdditiveCommand, found objects will be converted to
+            # PrincipalId's, so it will be turned into something like the following:
+            #   ( 'Add' => [ 1, 2, 'nonexistantuser@example' ] )
+            _ReplaceUserAndGroupById( \%tmp );
+
+            my $role_group;
+            if ( $type eq 'Requestor' )
+            {
+                $role_group = $ticket_as_user->Requestors;
+            }
+            elsif ( $type =~ /^RT::CustomRole-/ )
+            {
+                $role_group = $ticket_as_user->RoleGroup($type);
+            }
+            else
+            {
+                # AdminCc, Cc
+                $role_group = $ticket_as_user->$type;
+            }
+
+            my $members = $role_group->MembersObj( Recursively => 0 );
+
+            my @res;
+            while ( my $member = $members->Next ) {
+                push @res, $member->MemberId;
+            }
+
+            $tmp{'Default'} = [ @res ];
             my ($add, $del) = _CompileAdditiveForUpdate( %tmp );
+
             foreach my $text ( @$del ) {
-                my $user = RT::User->new($RT::SystemUser);
-                $user->LoadByEmail($text) if $text =~ /\@/;
-                $user->Load($text) unless $user->id;
+                # if we are removing a watcher, it is already has a user
+                # in the system, so emails will not be useful here
+                next if $text =~ /\@/;
                 my ( $val, $msg ) = $ticket_as_user->DeleteWatcher(
                     Type  => $type,
-                    PrincipalId => $user->PrincipalId,
+                    PrincipalId => $text,
                 );
                 push @{ $results{ 'Del'. $type } }, {
                     value   => $text,
@@ -511,15 +554,9 @@ sub ProcessCommands {
                 };
             }
             foreach my $text ( @$add ) {
-                my $user = RT::User->new($RT::SystemUser);
-                $user->LoadByEmail($text) if $text =~ /\@/;
-                $user->Load($text) unless $user->id;
                 my ( $val, $msg ) = $ticket_as_user->AddWatcher(
                     Type  => $type,
-                    $user->id
-                        ? (PrincipalId => $user->PrincipalId)
-                        : (Email => $text)
-                    ,
+                    $text =~ /\D/ ? (Email => $text) : (PrincipalId => $text),
                 );
                 push @{ $results{ 'Add'. $type } }, {
                     value   => $text,
@@ -641,59 +678,6 @@ sub ProcessCommands {
                     result => $val,
                     message => $msg,
                 };
-            }
-        }
-
-        $custom_roles->LimitToObjectId( $queue->id );
-        while ( my $custom_role = $custom_roles->Next ) {
-            my %tmp = _ParseAdditiveCommand( \%cmds, 0, "CustomRole{". $custom_role->Name ."}" );
-            next unless keys %tmp;
-
-            # Convert values to ID so we can better compare with the existing
-            # values when we are updating
-            # %tmp can be originally something like
-            #   ( 'Add' => [ 'user1@example.com', 'group:group1', 'nonexistantuser@example.com' ] )
-            # after _ParseAdditiveCommand, found objects will be converted to
-            # PrincipalId's, so it will be turned into something like the following:
-            #   ( 'Add' => [ 1, 2, 'nonexistantuser@example' ] )
-            _ReplaceUserAndGroupById( \%tmp );
-
-            my $role_group = $ticket_as_user->RoleGroup($custom_role->GroupType);
-            my $custom_role_members = $role_group->MembersObj( Recursively => 0 );
-
-            my @res;
-            while ( my $member = $custom_role_members->Next ) {
-                push @res, $member->MemberId;
-            }
-
-            $tmp{'Default'} = [ @res ];
-            my ($add, $del) = _CompileAdditiveForUpdate( %tmp );
-
-            foreach my $text ( @$del ) {
-                # if we are removing a watcher, it is already has a user
-                # in the system, so emails will not be useful here
-                next if $text =~ /\@/;
-                my ( $val, $msg ) = $ticket_as_user->DeleteWatcher(
-                    Type  => $custom_role->GroupType,
-                    PrincipalId => $text,
-                );
-                push @{ $results{ 'Del'. "CustomRole{". $custom_role->Name ."}" } }, {
-                    value   => $text,
-                    result  => $val,
-                    message => $msg
-                };
-            }
-            foreach my $text ( @$add ) {
-                my ( $val, $msg ) = $ticket_as_user->AddWatcher(
-                    Type  => $custom_role->GroupType,
-                    $text =~ /\D/ ? (Email => $text) : (PrincipalId => $text),
-                );
-                push @{ $results{ 'Add'. "CustomRole{". $custom_role->Name ."}" } }, {
-                    value   => $text,
-                    result  => $val,
-                    message => $msg
-                };
-
             }
         }
 
