@@ -420,6 +420,14 @@ sub ProcessCommands {
 
     my $transaction;
 
+    # Prepare Custom Roles. We will restrict also later to the ticket
+    # queue or to the creation queue according to the operation we are
+    # doing (create / update)
+    my $custom_roles = RT::CustomRoles->new( $args{'CurrentUser'} );
+    if ( RT::Handle::cmp_version($RT::VERSION, '5.0.4') >= 0 ) {
+        $custom_roles->LimitToLookupType( 'RT::Queue-RT::Ticket' );
+    }
+
     # If we're updating.
     if ( $args{'Ticket'}->id ) {
         $ticket_as_user->Load( $args{'Ticket'}->id );
@@ -620,6 +628,59 @@ sub ProcessCommands {
             }
         }
 
+        $custom_roles->LimitToObjectId( $queue->id );
+        while ( my $custom_role = $custom_roles->Next ) {
+            my %tmp = _ParseAdditiveCommand( \%cmds, 0, "CustomRole{". $custom_role->Name ."}" );
+            next unless keys %tmp;
+
+            # Convert values to ID so we can better compare with the existing
+            # values when we are updating
+            # %tmp can be originally something like
+            #   ( 'Add' => [ 'user1@example.com', 'group:group1', 'nonexistantuser@example.com' ] )
+            # after _ParseAdditiveCommand, found objects will be converted to
+            # PrincipalId's, so it will be turned into something like the following:
+            #   ( 'Add' => [ 1, 2, 'nonexistantuser@example' ] )
+            _ReplaceUserAndGroupById( \%tmp );
+
+            my $role_group = $ticket_as_user->RoleGroup($custom_role->GroupType);
+            my $custom_role_members = $role_group->MembersObj( Recursively => 0 );
+
+            my @res;
+            while ( my $member = $custom_role_members->Next ) {
+                push @res, $member->MemberId;
+            }
+
+            $tmp{'Default'} = [ @res ];
+            my ($add, $del) = _CompileAdditiveForUpdate( %tmp );
+
+            foreach my $text ( @$del ) {
+                # if we are removing a watcher, it is already has a user
+                # in the system, so emails will not be useful here
+                next if $text =~ /\@/;
+                my ( $val, $msg ) = $ticket_as_user->DeleteWatcher(
+                    Type  => $custom_role->GroupType,
+                    PrincipalId => $text,
+                );
+                push @{ $results{ 'Del'. "CustomRole{". $custom_role->Name ."}" } }, {
+                    value   => $text,
+                    result  => $val,
+                    message => $msg
+                };
+            }
+            foreach my $text ( @$add ) {
+                my ( $val, $msg ) = $ticket_as_user->AddWatcher(
+                    Type  => $custom_role->GroupType,
+                    $text =~ /\D/ ? (Email => $text) : (PrincipalId => $text),
+                );
+                push @{ $results{ 'Add'. "CustomRole{". $custom_role->Name ."}" } }, {
+                    value   => $text,
+                    result  => $val,
+                    message => $msg
+                };
+
+            }
+        }
+
         foreach my $attribute (grep $_ eq 'Status', @REGULAR_ATTRIBUTES) {
             next unless defined $cmds{ lc $attribute };
             next if $ticket_as_user->$attribute() eq $cmds{ lc $attribute };
@@ -679,6 +740,14 @@ sub ProcessCommands {
             my %tmp = _ParseAdditiveCommand( \%cmds, 0, "CustomField{". $cf->Name ."}" );
             next unless keys %tmp;
             $create_args{ 'CustomField-' . $cf->id } = [ _CompileAdditiveForCreate(%tmp) ];
+        }
+
+        # Canonicalize custom roles
+        $custom_roles->LimitToObjectId( $queue->id );
+        while ( my $custom_role = $custom_roles->Next ) {
+            my %tmp = _ParseAdditiveCommand( \%cmds, 0, "CustomRole{". $custom_role->Name ."}" );
+            next unless keys %tmp;
+            $create_args{ $custom_role->GroupType } = [ _CompileAdditiveForCreate(%tmp) ];
         }
 
         # Canonicalize watchers
@@ -769,6 +838,48 @@ sub ProcessCommands {
     return { CurrentUser => $args{'CurrentUser'},
              AuthLevel   => -2,
              Transaction => $transaction };
+}
+
+sub _ReplaceUserAndGroupById {
+    my $cmds = shift;
+
+    foreach my $key (keys %$cmds) {
+        my @values = @{ $cmds->{$key} };
+        next unless @values;
+
+        my @new_values;
+        # Check each value and see if it can be a user or a group
+        foreach my $value (@values) {
+            if ($value =~ /^group\:(.*)/) {
+                my $group_name = $1;
+                $group_name =~ s/^\s+|\s+$//g;
+
+                my $group = RT::Group->new(RT->SystemUser);
+                $group->LoadUserDefinedGroup($group_name);
+                if ($group->id) {
+                    push @new_values, $group->id;
+                    next;
+                } else {
+                    RT->Logger->error("Group '$1' not found");
+                    next;
+                }
+            }
+            my $user = RT::User->new(RT->SystemUser);
+            $user->LoadByEmail($value) if $value =~ /\@/;
+            $user->Load($value) unless $user->id;
+            if ($user->id) {
+                push @new_values, $user->id;
+                next;
+            } else {
+                RT->Logger->warning("User '$value' not found");
+                next unless $value =~ /\@/;
+            }
+            # If no user or group found, keep the original value in case
+            # it contains an email address
+            push @new_values, $value;
+        }
+        $cmds->{$key} = \@new_values;
+    }
 }
 
 sub _ParseAdditiveCommand {
@@ -871,6 +982,10 @@ sub _CanonicalizeCommand {
     # CustomField commands
     $key =~ s/^(add|del|)c(?:ustom)?-?f(?:ield)?\.?[({\[](.*)[)}\]]$/$1customfield{$2}/i;
     $key =~ s/^(?:transaction|txn)c(?:ustom)?-?f(?:ield)?\.?[({\[](.*)[)}\]]$/transactioncustomfield{$1}/i;
+
+    # CustomRole commands
+    $key =~ s/^(add|del|)c(?:ustom)?-?r(?:ole)?\.?[({\[](.*)[)}\]]$/$1customrole{$2}/i;
+
     return $key;
 }
 
@@ -878,6 +993,7 @@ sub _CheckCommand {
     my ($cmd, $val) = (lc shift, shift);
     return 1 if $cmd =~ /^(add|del|)customfield\{.*\}$/i;
     return 1 if $cmd =~ /^transactioncustomfield\{.*\}$/i;
+    return 1 if $cmd =~ /^(add|del|)customrole\{.*\}$/i;
     if ( grep $cmd eq lc $_, @REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES, @DATE_ATTRIBUTES ) {
         return 1 unless ref $val;
         return (0, "Command '$cmd' doesn't support multiple values");
