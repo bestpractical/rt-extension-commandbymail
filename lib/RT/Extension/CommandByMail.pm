@@ -203,7 +203,7 @@ value.
 
 =head3 Watchers
 
-Manage watchers: requestors, ccs and admin ccs. This commands
+Manage watchers: requestors, ccs and admin ccs. These commands
 can be used several times and/or with C<Add> and C<Del> prefixes,
 for example C<Requestor> comand set requestor(s) and the current
 requestors would be deleted, but C<AddRequestor> command adds
@@ -218,6 +218,22 @@ to the current list.
     AdminCc: <address> Set AdminCc watcher(s) using the email address
     AddAdminCc: <address> Add new AdminCc watcher using the email address
     DelAdminCc: <address> Remove email address as AdminCc watcher
+
+=head3 Custom Roles
+
+Manage custom roles of the ticket.
+These commands can be used several times and/or with C<Add> and C<Del>
+prefixes. If you have a Custom Role called C<Customer> for example, you can
+pass the command C<CustomRole.{Customer}> to set the members of that role.
+You can pass either a username or an email address.
+For groups, you must prefix the group name with C<group:>. For example,
+C<CustomRole.{Customer}: group:MyGroupname>.
+
+        CustomRole.{Customer}: set the members of the Customer Custom Role
+        AddCustomRole.{Customer}: add members to the Customer Custom Role
+        DelCustomRole.{Customer}: remove members from the Customer Custom Role
+
+Replace C<Customer> with the name of your Custom Role.
 
 =head3 Links
 
