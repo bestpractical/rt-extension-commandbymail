@@ -208,6 +208,8 @@ can be used several times and/or with C<Add> and C<Del> prefixes,
 for example C<Requestor> comand set requestor(s) and the current
 requestors would be deleted, but C<AddRequestor> command adds
 to the current list.
+For groups, you must prefix the group name with C<group:>. For example,
+C<AddAdminCc: group:MyGroupname>.
 
     Requestor: <address> Set requestor(s) using the email address
     AddRequestor: <address> Add new requestor using the email address
