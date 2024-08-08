@@ -449,7 +449,8 @@ sub ProcessCommands {
     # If we're updating.
     if ( $args{'Ticket'}->id ) {
         $ticket_as_user->Load( $args{'Ticket'}->id );
-        $RT::Logger->debug("Updating Ticket ".$ticket_as_user->Id." in Queue ".$queue->Name);
+        $RT::Logger->debug("Updating Ticket ".$ticket_as_user->Id .
+            ( defined $queue->Name ? " in Queue " . $queue->Name : '' ));
 
         # we set status later as correspond can reopen ticket
         foreach my $attribute (grep !/^(Status|TimeWorked)/, @REGULAR_ATTRIBUTES, @TIME_ATTRIBUTES) {
