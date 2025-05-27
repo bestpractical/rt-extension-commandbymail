@@ -1078,6 +1078,48 @@ sub ParseCcAddressesFromHead {
         qw(To Cc);
 }
 
+if ( RT->Config->can('RegisterPluginConfig') ) {
+    RT->Config->RegisterPluginConfig(
+        Plugin  => 'CommandByMail',
+        Content => [
+            {
+                Name => 'CommandByMailGroup',
+                Help => 'https://metacpan.org/pod/RT::Extension::CommandByMail#$CommandByMailGroup',
+            },
+            {
+                Name => 'CommandByMailHeader',
+                Help => 'https://metacpan.org/pod/RT::Extension::CommandByMail#$CommandByMailHeader',
+            },
+            {
+                Name => 'CommandByMailOnlyHeaders',
+                Help => 'https://metacpan.org/pod/RT::Extension::CommandByMail#$CommandByMailOnlyHeaders',
+            },
+            {
+                Name => 'CommandByMailErrorOnUnknown',
+                Help => 'https://metacpan.org/pod/RT::Extension::CommandByMail#$CommandByMailErrorOnUnknown',
+            },
+        ],
+        Meta    => {
+            CommandByMailGroup => {
+                Type   => 'SCALAR',
+                Widget => '/Widgets/Form/String',
+            },
+            CommandByMailHeader => {
+                Type   => 'SCALAR',
+                Widget => '/Widgets/Form/String',
+            },
+            CommandByMailOnlyHeaders => {
+                Type   => 'SCALAR',
+                Widget => '/Widgets/Form/Boolean',
+            },
+            CommandByMailErrorOnUnknown => {
+                Type   => 'SCALAR',
+                Widget => '/Widgets/Form/Boolean',
+            },
+        }
+    );
+}
+
 1;
 __END__
 
