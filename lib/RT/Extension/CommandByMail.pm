@@ -11,7 +11,7 @@ our @LINK_ATTRIBUTES    = qw(MemberOf Parents Members Children
             HasMember RefersTo ReferredToBy DependsOn DependedOnBy);
 our @WATCHER_ATTRIBUTES = qw(Requestor Cc AdminCc);
 
-our $VERSION = '3.01';
+our $VERSION = '3.02';
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ RT::Extension::CommandByMail - Change ticket metadata via email
 
 =head1 RT VERSION
 
-Works with RT 4.4, 5.0
+Works with RT 4.4, 5.0, 6.0
 
 =head1 SYNOPSIS
 
@@ -53,7 +53,7 @@ C<$CommandByMailErrorOnUnknown> under "Configuration" for more information.
 
 May need root permissions
 
-=item Edit your F</opt/rt5/etc/RT_SiteConfig.pm>
+=item Edit your F</opt/rt6/etc/RT_SiteConfig.pm>
 
 If you are using RT 4.2 or greater, add this line:
 
@@ -1078,6 +1078,48 @@ sub ParseCcAddressesFromHead {
         qw(To Cc);
 }
 
+if ( RT->Config->can('RegisterPluginConfig') ) {
+    RT->Config->RegisterPluginConfig(
+        Plugin  => 'CommandByMail',
+        Content => [
+            {
+                Name => 'CommandByMailGroup',
+                Help => 'https://metacpan.org/pod/RT::Extension::CommandByMail#$CommandByMailGroup',
+            },
+            {
+                Name => 'CommandByMailHeader',
+                Help => 'https://metacpan.org/pod/RT::Extension::CommandByMail#$CommandByMailHeader',
+            },
+            {
+                Name => 'CommandByMailOnlyHeaders',
+                Help => 'https://metacpan.org/pod/RT::Extension::CommandByMail#$CommandByMailOnlyHeaders',
+            },
+            {
+                Name => 'CommandByMailErrorOnUnknown',
+                Help => 'https://metacpan.org/pod/RT::Extension::CommandByMail#$CommandByMailErrorOnUnknown',
+            },
+        ],
+        Meta    => {
+            CommandByMailGroup => {
+                Type   => 'SCALAR',
+                Widget => '/Widgets/Form/String',
+            },
+            CommandByMailHeader => {
+                Type   => 'SCALAR',
+                Widget => '/Widgets/Form/String',
+            },
+            CommandByMailOnlyHeaders => {
+                Type   => 'SCALAR',
+                Widget => '/Widgets/Form/Boolean',
+            },
+            CommandByMailErrorOnUnknown => {
+                Type   => 'SCALAR',
+                Widget => '/Widgets/Form/Boolean',
+            },
+        }
+    );
+}
+
 1;
 __END__
 
@@ -1097,7 +1139,7 @@ or via the web at
 
 =head1 LICENSE AND COPYRIGHT
 
-This software is Copyright (c) 2014-2020 by Best Practical Solutions
+This software is Copyright (c) 2014-2025 by Best Practical Solutions
 
 This is free software, licensed under:
 
