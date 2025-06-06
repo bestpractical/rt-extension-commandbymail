@@ -19,7 +19,7 @@ RT::Extension::CommandByMail - Change ticket metadata via email
 
 =head1 RT VERSION
 
-Works with RT 4.4, 5.0
+Works with RT 4.4, 5.0, 6.0
 
 =head1 SYNOPSIS
 
@@ -53,7 +53,7 @@ C<$CommandByMailErrorOnUnknown> under "Configuration" for more information.
 
 May need root permissions
 
-=item Edit your F</opt/rt5/etc/RT_SiteConfig.pm>
+=item Edit your F</opt/rt6/etc/RT_SiteConfig.pm>
 
 If you are using RT 4.2 or greater, add this line:
 
@@ -1097,7 +1097,7 @@ or via the web at
 
 =head1 LICENSE AND COPYRIGHT
 
-This software is Copyright (c) 2014-2020 by Best Practical Solutions
+This software is Copyright (c) 2014-2025 by Best Practical Solutions
 
 This is free software, licensed under:
 
